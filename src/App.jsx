@@ -24,7 +24,6 @@ import {
   Phone,
   Mail,
   Globe,
-  Instagram,
   CheckCircle2,
 } from 'lucide-react';
 

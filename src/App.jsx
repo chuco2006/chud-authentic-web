@@ -28,10 +28,10 @@ const DEFAULT_SITE_CONFIG = {
   email: "chucospktk24@gmail.com",
   domain: "chudauthentic.store",
   address: "TP. Hồ Chí Minh, Việt Nam",
-  // Cấu hình tài khoản nhận tiền VietQR (Sửa trực tiếp được trong Admin)
   bankId: "MB",
-  bankAccountNo: "0356926605",
-  bankAccountName: "CHU DUNG CO",
+  bankAccountNo: "20069696969696",
+  bankAccountName: "HO KINH DOANH CHUD",
+  sepayApiToken: "2XUGLIKPNDP8EXLMHSWSEI11LYCYG5QQQ9UKGW9FOVYL7MOPEWCNMJ46HSNS53PZ",
   orders: []
 };
 
@@ -167,11 +167,9 @@ export default function App() {
   const [siteConfig, setSiteConfig] = useState(DEFAULT_SITE_CONFIG);
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
 
-  // Trạng thái Cloud
   const [cloudStatus, setCloudStatus] = useState("loading");
   const [statusMsg, setStatusMsg] = useState("Đang tải dữ liệu...");
 
-  // Trạng thái Tìm kiếm & Bộ lọc
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
   const [selectedBrand, setSelectedBrand] = useState("Tất cả");
@@ -179,10 +177,8 @@ export default function App() {
   const [sortBy, setSortBy] = useState("newest");
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
-  // Lựa chọn Size & Màu trên từng thẻ
   const [cardSelections, setCardSelections] = useState({});
 
-  // Trang Chi Tiết Sản Phẩm
   const [activeProduct, setActiveProduct] = useState(null);
   const [detailSize, setDetailSize] = useState("");
   const [detailColor, setDetailColor] = useState("");
@@ -190,7 +186,6 @@ export default function App() {
   const [activeImage, setActiveImage] = useState("");
   const [addedToast, setAddedToast] = useState("");
 
-  // Giỏ hàng & Thanh toán (Checkout)
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -198,11 +193,13 @@ export default function App() {
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [customerNote, setCustomerNote] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("COD"); // COD | VIETQR | ZALO
+  const [paymentMethod, setPaymentMethod] = useState("COD");
   const [createdOrder, setCreatedOrder] = useState(null);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
 
-  // Bảng Size & Coupon
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
+  const [isPaidSuccess, setIsPaidSuccess] = useState(false);
+
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -210,7 +207,6 @@ export default function App() {
   const [userWeight, setUserWeight] = useState(65);
   const [headCircumference, setHeadCircumference] = useState(57.7);
 
-  // Trạng thái Admin
   const [isAdmin, setIsAdmin] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [pinInput, setPinInput] = useState("");
@@ -239,7 +235,21 @@ export default function App() {
         const data = await res.json();
         if (data && data.length > 0) {
           if (data[0].site_config) {
-            setSiteConfig({ ...DEFAULT_SITE_CONFIG, ...data[0].site_config });
+            const loadedCfg = data[0].site_config;
+            setSiteConfig({
+              ...DEFAULT_SITE_CONFIG,
+              ...loadedCfg,
+              bankId: loadedCfg.bankId || DEFAULT_SITE_CONFIG.bankId,
+              bankAccountNo:
+                loadedCfg.bankAccountNo && loadedCfg.bankAccountNo !== "0356926605"
+                  ? loadedCfg.bankAccountNo
+                  : DEFAULT_SITE_CONFIG.bankAccountNo,
+              bankAccountName:
+                loadedCfg.bankAccountName && loadedCfg.bankAccountName !== "CHU DUNG CO"
+                  ? loadedCfg.bankAccountName
+                  : DEFAULT_SITE_CONFIG.bankAccountName,
+              sepayApiToken: loadedCfg.sepayApiToken || DEFAULT_SITE_CONFIG.sepayApiToken
+            });
           }
           if (data[0].products) setProducts(data[0].products);
           setCloudStatus("synced");
@@ -259,6 +269,49 @@ export default function App() {
     loadStoreFromSupabase();
   }, []);
 
+  // 2. TỰ ĐỘNG QUÉT GIAO DỊCH SEPAY MỖI 3 GIÂY
+  useEffect(() => {
+    if (
+      !createdOrder ||
+      createdOrder.paymentMethod !== "VIETQR" ||
+      isPaidSuccess ||
+      !siteConfig.sepayApiToken
+    ) {
+      return;
+    }
+
+    setIsCheckingPayment(true);
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch("/api/sepay", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sepayToken: siteConfig.sepayApiToken.trim(),
+            orderCode: createdOrder.orderCode,
+            expectedAmount: createdOrder.totalAmount
+          })
+        });
+
+        if (!res.ok) return;
+        const result = await res.json();
+
+        if (result?.paid) {
+          clearInterval(interval);
+          setIsPaidSuccess(true);
+          setIsCheckingPayment(false);
+
+          const updatedOrders = (siteConfig.orders || []).map((o) =>
+            o.id === createdOrder.id ? { ...o, status: "Đã thanh toán (SePay Auto)" } : o
+          );
+          saveToSupabase({ ...siteConfig, orders: updatedOrders }, products);
+        }
+      } catch (_) {}
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [createdOrder, isPaidSuccess, siteConfig, products]);
+
   // Phím tắt
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -276,7 +329,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isAdmin]);
 
-  // 2. ĐỒNG BỘ SUPABASE
+  // 3. ĐỒNG BỘ SUPABASE CLOUD
   const saveToSupabase = async (newConfig, newProducts) => {
     setSiteConfig(newConfig);
     setProducts(newProducts);
@@ -343,7 +396,7 @@ export default function App() {
     }));
   };
 
-  // 3. QUẢN TRỊ SẢN PHẨM (ADMIN)
+  // 4. QUẢN TRỊ SẢN PHẨM (ADMIN)
   const openAddProductModal = () => {
     const newProd = {
       id: Date.now(),
@@ -432,7 +485,7 @@ export default function App() {
     reader.readAsDataURL(file);
   };
 
-  // 4. BỘ LỌC & GIỎ HÀNG
+  // 5. BỘ LỌC & GIỎ HÀNG
   const categories = useMemo(() => ["Tất cả", ...new Set(products.map((p) => p.category))], [products]);
   const brands = useMemo(() => ["Tất cả", ...new Set(products.map((p) => p.brand))], [products]);
 
@@ -515,9 +568,7 @@ export default function App() {
 
   const formatVND = (num) => Number(num || 0).toLocaleString("vi-VN") + "đ";
 
-  // ==========================================
-  // 5. XỬ LÝ ĐẶT HÀNG (COD, VIETQR & ZALO)
-  // ==========================================
+  // 6. XỬ LÝ ĐẶT HÀNG (COD, SEPAY VIETQR & ZALO)
   const buildZaloMessage = (orderObj) => {
     const itemsList = orderObj.items
       .map(
@@ -530,7 +581,7 @@ export default function App() {
 
     const payLabel =
       orderObj.paymentMethod === "VIETQR"
-        ? "Chuyển khoản ngân hàng (VietQR)"
+        ? "Chuyển khoản ngân hàng (VietQR MBBank)"
         : orderObj.paymentMethod === "COD"
         ? "Thanh toán khi nhận hàng (COD)"
         : "Tư vấn qua Zalo";
@@ -556,7 +607,6 @@ export default function App() {
       .join("\n");
   };
 
-  // Chốt đơn nhanh qua Zalo trực tiếp từ giỏ hàng
   const handleQuickZaloFromCart = () => {
     const tempOrder = {
       orderCode: "ZALO" + String(Date.now()).slice(-4),
@@ -576,7 +626,6 @@ export default function App() {
     window.open(`https://zalo.me/${siteConfig.hotline.replace(/[^0-9]/g, "")}`, "_blank");
   };
 
-  // Xác nhận Đặt hàng chính thức trên Web (COD / VietQR / Zalo)
   const handleConfirmOrder = async (e) => {
     e.preventDefault();
     if (!customerName.trim() || !customerPhone.trim() || !customerAddress.trim()) {
@@ -585,6 +634,8 @@ export default function App() {
     }
 
     setIsSubmittingOrder(true);
+    setIsPaidSuccess(false);
+
     const orderCode = "CD" + String(Date.now()).slice(-5);
 
     const newOrder = {
@@ -595,7 +646,7 @@ export default function App() {
       customerPhone: customerPhone.trim(),
       customerAddress: customerAddress.trim(),
       customerNote: customerNote.trim(),
-      paymentMethod, // COD | VIETQR | ZALO
+      paymentMethod,
       status: paymentMethod === "VIETQR" ? "Chờ chuyển khoản" : "Mới đặt",
       items: cart.map((i) => ({
         id: i.id,
@@ -613,7 +664,6 @@ export default function App() {
     };
 
     try {
-      // Tải danh sách đơn hàng mới nhất từ Supabase để không bị ghi đè
       let latestConfig = { ...siteConfig };
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/store_data?id=eq.1&select=site_config`, {
@@ -637,7 +687,6 @@ export default function App() {
       setCreatedOrder(newOrder);
       setCart([]);
 
-      // Nếu khách chọn chốt qua Zalo thì tự động copy đơn & mở Zalo luôn
       if (paymentMethod === "ZALO") {
         const msg = buildZaloMessage(newOrder);
         navigator.clipboard?.writeText(msg);
@@ -648,14 +697,13 @@ export default function App() {
     }
   };
 
-  // Tạo link ảnh QR VietQR tự động theo đúng số tiền và mã đơn
   const getVietQrUrl = (orderObj) => {
     const bankId = siteConfig.bankId || "MB";
-    const accountNo = (siteConfig.bankAccountNo || "0356926605").replace(/\s+/g, "");
-    const accountName = encodeURIComponent(siteConfig.bankAccountName || "CHU DUNG CO");
+    const accountNo = (siteConfig.bankAccountNo || "20069696969696").replace(/\s+/g, "");
+    const accountName = encodeURIComponent(siteConfig.bankAccountName || "HO KINH DOANH CHUD");
     const amount = orderObj ? orderObj.totalAmount : finalTotal;
     const transferContent = orderObj
-      ? `CHUD ${orderObj.orderCode} ${orderObj.customerPhone}`
+      ? `CHUD ${orderObj.orderCode}`
       : `CHUD ${customerPhone || "THANHTOAN"}`;
 
     return `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(
@@ -663,7 +711,6 @@ export default function App() {
     )}&accountName=${accountName}`;
   };
 
-  // Cập nhật trạng thái đơn hàng trong Admin
   const handleUpdateOrderStatus = (orderId, newStatus) => {
     const updatedOrders = (siteConfig.orders || []).map((o) =>
       o.id === orderId ? { ...o, status: newStatus } : o
@@ -703,7 +750,6 @@ export default function App() {
       setPinError("Mã PIN không chính xác.");
     }
   };
-
   return (
     <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white">
       {/* THÔNG BÁO KHI THÊM GIỎ HÀNG */}
@@ -746,7 +792,13 @@ export default function App() {
               onClick={() => setIsBankModalOpen(true)}
               className="border border-zinc-600 px-3 py-1.5 font-bold uppercase tracking-wider hover:border-white transition flex items-center gap-1"
             >
-              <QrCode className="w-3.5 h-3.5" /> Cấu Hình VietQR
+              <QrCode className="w-3.5 h-3.5" /> Cấu Hình MBBank & SePay
+            </button>
+            <button
+              onClick={() => saveToSupabase(siteConfig, products)}
+              className="border border-zinc-600 px-3 py-1.5 font-medium hover:border-white transition"
+            >
+              Đồng bộ ngay
             </button>
             <button
               onClick={() => setIsAdmin(false)}
@@ -838,7 +890,7 @@ export default function App() {
       </header>
 
       {/* ================================================================= */}
-      {/* MÀN HÌNH 1: TRANG CHI TIẾT SẢN PHẨM RIÊNG BIỆT */}
+      {/* MÀN HÌNH 1: TRANG CHI TIẾT SẢN PHẨM ĐẦY ĐỦ (KHI CLICK VÀO SP) */}
       {/* ================================================================= */}
       {activeProduct ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -865,6 +917,7 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            {/* Bộ ảnh Gallery bên trái */}
             <div className="lg:col-span-7 space-y-4">
               <div className="aspect-[4/5] bg-zinc-100 border border-zinc-200 overflow-hidden relative">
                 {activeProduct.tag && (
@@ -900,6 +953,7 @@ export default function App() {
               )}
             </div>
 
+            {/* Thông tin chi tiết & Chọn Màu / Size / Mua hàng bên phải */}
             <div className="lg:col-span-5 space-y-6">
               <div>
                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400">
@@ -930,7 +984,7 @@ export default function App() {
                 {activeProduct.description || "Sản phẩm chính hãng phân phối bởi ChuD Authentic."}
               </p>
 
-              {/* Chọn Màu sắc */}
+              {/* 1. Chọn Màu sắc */}
               <div className="space-y-2.5">
                 <div className="flex justify-between text-xs uppercase tracking-wider">
                   <span className="font-bold text-zinc-500">1. Chọn Màu Sắc:</span>
@@ -956,7 +1010,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Chọn Size */}
+              {/* 2. Chọn Size */}
               <div className="space-y-2.5">
                 <div className="flex justify-between items-center text-xs uppercase tracking-wider">
                   <span>
@@ -987,7 +1041,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Số lượng & Nút Mua */}
+              {/* 3. Số lượng & Nút Thao tác */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center border border-black">
@@ -1016,7 +1070,6 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Nút Mua Ngay mở thẳng bảng Thanh Toán COD / VietQR */}
                 <button
                   onClick={() => {
                     addToCart(activeProduct, detailSize, detailColor, detailQty, false);
@@ -1025,11 +1078,11 @@ export default function App() {
                   }}
                   className="w-full border-2 border-black bg-white text-black py-3.5 px-6 text-xs font-black uppercase tracking-[0.18em] hover:bg-black hover:text-white transition"
                 >
-                  Mua Ngay (COD / Chuyển Khoản VietQR)
+                  Mua Ngay (COD / VietQR Tự Động)
                 </button>
               </div>
 
-              {/* Thông số kỹ thuật */}
+              {/* Bảng Thông số chi tiết */}
               <div className="bg-zinc-50 border border-zinc-200 p-5 space-y-3 text-xs mt-6">
                 <div className="font-black uppercase tracking-widest text-black border-b border-zinc-200 pb-2">
                   Thông tin & Đặc điểm sản phẩm
@@ -1053,10 +1106,42 @@ export default function App() {
                 <div className="grid grid-cols-3 py-1">
                   <span className="text-zinc-500 font-medium">Thanh toán:</span>
                   <span className="col-span-2 font-bold">
-                    Hỗ trợ COD nhận hàng kiểm tra hoặc VietQR chuyển khoản nhanh
+                    Hỗ trợ COD nhận hàng kiểm tra hoặc VietQR MBBank tự động xác nhận
                   </span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Sản phẩm gợi ý cùng kệ hàng */}
+          <div className="mt-16 pt-10 border-t border-zinc-200">
+            <h3 className="text-lg font-black uppercase tracking-wider mb-6">
+              Sản Phẩm Khác Bạn Có Thể Thích
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+              {products
+                .filter((p) => p.id !== activeProduct.id)
+                .slice(0, 4)
+                .map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => openProductDetail(item)}
+                    className="group border border-zinc-200 hover:border-black cursor-pointer transition bg-white"
+                  >
+                    <div className="aspect-[4/5] bg-zinc-100 overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      />
+                    </div>
+                    <div className="p-3.5">
+                      <div className="text-[10px] font-bold uppercase text-zinc-400">{item.brand}</div>
+                      <div className="text-xs font-bold line-clamp-1 mt-0.5">{item.name}</div>
+                      <div className="text-sm font-black mt-1.5">{formatVND(item.price)}</div>
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
         </main>
@@ -1347,7 +1432,7 @@ export default function App() {
         </>
       )}
 
-      {/* CAM KẾT CHÍNH HÃNG */}
+      {/* CAM KẾT CHÍNH HÃNG CHUD AUTHENTIC */}
       <section className="border-t border-b border-zinc-200 bg-zinc-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="flex items-start gap-4">
@@ -1362,9 +1447,9 @@ export default function App() {
           <div className="flex items-start gap-4">
             <Truck className="w-8 h-8 shrink-0" />
             <div>
-              <h4 className="font-black uppercase text-sm tracking-wider">Thanh Toán COD & VietQR</h4>
+              <h4 className="font-black uppercase text-sm tracking-wider">Thanh Toán COD & VietQR Tự Động</h4>
               <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
-                Hỗ trợ thanh toán khi nhận hàng (COD) toàn quốc hoặc quét mã QR ngân hàng tự động.
+                Hỗ trợ thanh toán khi nhận hàng (COD) toàn quốc hoặc quét mã VietQR MBBank xác nhận tự động.
               </p>
             </div>
           </div>
@@ -1429,7 +1514,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-
       {/* ================================================================= */}
       {/* GIỎ HÀNG (SLIDE-OVER DRAWER) */}
       {/* ================================================================= */}
@@ -1518,7 +1602,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Nút 1: Mở trang điền thông tin Đặt Hàng chuẩn App (COD / VietQR) */}
                 <button
                   onClick={() => {
                     setIsCartOpen(false);
@@ -1527,10 +1610,9 @@ export default function App() {
                   }}
                   className="w-full bg-black text-white py-3.5 font-black uppercase tracking-widest hover:bg-zinc-800 transition flex items-center justify-center gap-2"
                 >
-                  <CreditCard className="w-4 h-4" /> Tiến Hành Đặt Hàng (COD / VietQR)
+                  <CreditCard className="w-4 h-4" /> Đặt Hàng (COD / VietQR Tự Động)
                 </button>
 
-                {/* Nút 2: Chốt đơn nhanh qua Zalo */}
                 <button
                   onClick={handleQuickZaloFromCart}
                   className="w-full border border-black bg-white text-black py-3 font-bold uppercase tracking-wider hover:bg-zinc-100 transition flex items-center justify-center gap-2"
@@ -1544,7 +1626,7 @@ export default function App() {
       )}
 
       {/* ================================================================= */}
-      {/* MODAL THANH TOÁN & ĐẶT HÀNG (COD / VIETQR BANKING / ZALO) */}
+      {/* MODAL THANH TOÁN & TỰ ĐỘNG XÁC NHẬN SEPAY REALTIME */}
       {/* ================================================================= */}
       {isCheckoutOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
@@ -1552,91 +1634,94 @@ export default function App() {
             <div className="flex items-center justify-between border-b border-zinc-200 pb-4 mb-6">
               <h2 className="text-base sm:text-lg font-black uppercase tracking-wider flex items-center gap-2">
                 <Package className="w-5 h-5" />
-                {createdOrder ? `Đặt Hàng Thành Công (#${createdOrder.orderCode})` : "Thông Tin Giao Hàng & Thanh Toán"}
+                {createdOrder ? `Đơn Hàng #${createdOrder.orderCode}` : "Thông Tin Giao Hàng & Thanh Toán"}
               </h2>
               <button onClick={() => setIsCheckoutOpen(false)}>
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* MÀN HÌNH SAU KHI ĐẶT HÀNG THÀNH CÔNG */}
             {createdOrder ? (
               <div className="space-y-6 text-xs">
-                <div className="bg-emerald-50 border border-emerald-500 p-4 flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-black uppercase text-sm text-emerald-900">
-                      Đơn hàng #{createdOrder.orderCode} đã được ghi nhận!
+                {isPaidSuccess ? (
+                  <div className="bg-emerald-600 text-white p-6 text-center space-y-2">
+                    <CheckCircle2 className="w-12 h-12 mx-auto text-white" />
+                    <div className="text-lg font-black uppercase tracking-wider">
+                      ĐÃ NHẬN ĐƯỢC TIỀN — THANH TOÁN THÀNH CÔNG
                     </div>
-                    <p className="text-emerald-800 mt-1">
-                      Cảm ơn <b>{createdOrder.customerName}</b>. ChuD Authentic sẽ liên hệ xác nhận qua số điện thoại{" "}
-                      <b>{createdOrder.customerPhone}</b> sớm nhất.
+                    <p className="text-emerald-100">
+                      Hệ thống MBBank & SePay đã xác nhận tự động đơn hàng <b>#{createdOrder.orderCode}</b> của bạn. ChuD Authentic đang chuẩn bị đóng gói sản phẩm.
                     </p>
                   </div>
-                </div>
+                ) : (
+                  <div className="bg-emerald-50 border border-emerald-500 p-4 flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-black uppercase text-sm text-emerald-900">
+                        Đơn hàng #{createdOrder.orderCode} đã được khởi tạo
+                      </div>
+                      <p className="text-emerald-800 mt-1">
+                        Người nhận: <b>{createdOrder.customerName}</b> — SĐT: <b>{createdOrder.customerPhone}</b>
+                      </p>
+                    </div>
+                  </div>
+                )}
 
-                {/* Nếu khách chọn VietQR -> Hiển thị mã QR tự động tính đúng số tiền */}
-                {createdOrder.paymentMethod === "VIETQR" && (
+                {createdOrder.paymentMethod === "VIETQR" && !isPaidSuccess && (
                   <div className="border-2 border-black p-5 bg-zinc-50 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                    <div className="text-center space-y-2">
+                    <div className="text-center space-y-3">
                       <div className="font-black uppercase tracking-wider text-xs">
-                        Quét Mã VietQR Bằng App Ngân Hàng
+                        Quét Mã VietQR MBBank Để Thanh Toán Tự Động
                       </div>
                       <img
                         src={getVietQrUrl(createdOrder)}
-                        alt="VietQR Payment"
+                        alt="VietQR MBBank"
                         className="w-56 h-56 mx-auto border border-zinc-300 bg-white p-2 object-contain"
                       />
-                      <p className="text-[11px] text-zinc-500">
-                        Số tiền & nội dung chuyển khoản đã được điền tự động.
-                      </p>
+                      {isCheckingPayment && (
+                        <div className="inline-flex items-center gap-2 bg-black text-white px-3 py-1.5 text-[11px] font-bold">
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                          Đang chờ bạn quét QR (Tự động xác nhận sau 3 giây)...
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-2.5 text-xs">
                       <div className="font-black uppercase text-sm border-b border-zinc-200 pb-2">
-                        Thông Tin Chuyển Khoản Thủ Công
+                        Thông Tin Tài Khoản Hộ Kinh Doanh
                       </div>
                       <div className="flex justify-between py-1 border-b border-zinc-200">
                         <span className="text-zinc-500">Ngân hàng:</span>
-                        <span className="font-black">{siteConfig.bankId || "MB"}</span>
+                        <span className="font-black">{siteConfig.bankId || "MB"} (MBBank)</span>
                       </div>
                       <div className="flex justify-between py-1 border-b border-zinc-200">
                         <span className="text-zinc-500">Số tài khoản:</span>
-                        <span className="font-black font-mono">{siteConfig.bankAccountNo}</span>
+                        <span className="font-black font-mono text-sm">{siteConfig.bankAccountNo}</span>
                       </div>
                       <div className="flex justify-between py-1 border-b border-zinc-200">
                         <span className="text-zinc-500">Chủ tài khoản:</span>
                         <span className="font-black uppercase">{siteConfig.bankAccountName}</span>
                       </div>
                       <div className="flex justify-between py-1 border-b border-zinc-200">
-                        <span className="text-zinc-500">Số tiền:</span>
+                        <span className="text-zinc-500">Số tiền chính xác:</span>
                         <span className="font-black text-base">{formatVND(createdOrder.totalAmount)}</span>
                       </div>
-                      <div className="flex justify-between py-1">
+                      <div className="flex justify-between py-1 border-b border-zinc-200">
                         <span className="text-zinc-500">Nội dung CK:</span>
-                        <span className="font-black bg-black text-white px-2 py-0.5">
-                          CHUD {createdOrder.orderCode} {createdOrder.customerPhone}
+                        <span className="font-black bg-black text-white px-2 py-0.5 font-mono">
+                          CHUD {createdOrder.orderCode}
                         </span>
                       </div>
+                      <p className="text-zinc-500 leading-relaxed pt-1">
+                        Khi quét mã QR bằng App Ngân hàng, số tiền và nội dung <b>CHUD {createdOrder.orderCode}</b> đã được điền tự động. Ngay sau khi chuyển thành công, màn hình này sẽ tự động nhảy hoàn tất.
+                      </p>
                     </div>
                   </div>
                 )}
 
-                {/* Tóm tắt thông tin đơn hàng */}
                 <div className="border border-zinc-200 p-4 space-y-2">
                   <div className="font-black uppercase">Chi tiết đơn hàng #{createdOrder.orderCode}</div>
-                  <div>Người nhận: <b>{createdOrder.customerName}</b> — {createdOrder.customerPhone}</div>
-                  <div>Địa chỉ: <b>{createdOrder.customerAddress}</b></div>
-                  <div>
-                    Hình thức thanh toán:{" "}
-                    <b>
-                      {createdOrder.paymentMethod === "VIETQR"
-                        ? "Chuyển khoản Ngân hàng (VietQR)"
-                        : createdOrder.paymentMethod === "COD"
-                        ? "Thanh toán khi nhận hàng (COD)"
-                        : "Chốt qua Zalo"}
-                    </b>
-                  </div>
+                  <div>Địa chỉ nhận hàng: <b>{createdOrder.customerAddress}</b></div>
                   <div className="pt-2 border-t border-zinc-100 space-y-1">
                     {createdOrder.items.map((it, idx) => (
                       <div key={idx} className="flex justify-between">
@@ -1662,7 +1747,7 @@ export default function App() {
                     }}
                     className="flex-1 bg-black text-white py-3.5 font-black uppercase tracking-wider hover:bg-zinc-800 transition"
                   >
-                    Gửi Mã Đơn / Bill Qua Zalo Shop
+                    Nhắn Zalo Hỗ Trợ Đơn Hàng
                   </button>
                   <button
                     onClick={() => {
@@ -1676,9 +1761,7 @@ export default function App() {
                 </div>
               </div>
             ) : (
-              /* FORM ĐIỀN THÔNG TIN ĐẶT HÀNG & CHỌN COD / VIETQR */
               <form onSubmit={handleConfirmOrder} className="grid grid-cols-1 md:grid-cols-12 gap-8 text-xs">
-                {/* Cột trái: Điền địa chỉ & Chọn phương thức thanh toán */}
                 <div className="md:col-span-7 space-y-4">
                   <div className="font-black uppercase tracking-wider text-sm border-b border-zinc-200 pb-2">
                     1. Thông Tin Người Nhận Hàng
@@ -1739,17 +1822,15 @@ export default function App() {
                     />
                   </div>
 
-                  {/* Chọn Phương Thức Thanh Toán */}
                   <div className="pt-2 space-y-2.5">
                     <div className="font-black uppercase tracking-wider text-sm border-b border-zinc-200 pb-2">
                       2. Chọn Phương Thức Thanh Toán
                     </div>
 
-                    {/* Lựa chọn 1: COD */}
                     <label
                       onClick={() => setPaymentMethod("COD")}
                       className={`flex items-start gap-3 p-3.5 border-2 cursor-pointer transition ${
-                        paymentMethod === "COD" ? "border-black bg-zinc-50" : "border-zinc-200 hover:border-zinc-400"
+                        paymentMethod === "COD" ? "border-black bg-zinc-50" : "border-zinc-200"
                       }`}
                     >
                       <input
@@ -1764,16 +1845,15 @@ export default function App() {
                           <Truck className="w-4 h-4" /> Thanh toán khi nhận hàng (COD)
                         </div>
                         <p className="text-zinc-500 mt-0.5">
-                          Nhận hàng, kiểm tra sản phẩm đúng tem mác chuẩn Authentic rồi mới thanh toán tiền mặt cho shipper.
+                          Nhận hàng kiểm tra sản phẩm đúng tem mác chuẩn Authentic rồi mới thanh toán tiền mặt.
                         </p>
                       </div>
                     </label>
 
-                    {/* Lựa chọn 2: Chuyển khoản ngân hàng qua VietQR */}
                     <label
                       onClick={() => setPaymentMethod("VIETQR")}
                       className={`flex items-start gap-3 p-3.5 border-2 cursor-pointer transition ${
-                        paymentMethod === "VIETQR" ? "border-black bg-zinc-50" : "border-zinc-200 hover:border-zinc-400"
+                        paymentMethod === "VIETQR" ? "border-black bg-zinc-50" : "border-zinc-200"
                       }`}
                     >
                       <input
@@ -1785,40 +1865,18 @@ export default function App() {
                       />
                       <div className="flex-1">
                         <div className="font-black uppercase flex items-center gap-1.5">
-                          <QrCode className="w-4 h-4" /> Chuyển khoản Ngân hàng tự động (VietQR)
+                          <QrCode className="w-4 h-4" /> Chuyển khoản Ngân hàng tự động (VietQR MBBank)
                         </div>
                         <p className="text-zinc-500 mt-0.5">
-                          Hiển thị mã QR Ngân hàng tự động điền sẵn số tiền và nội dung đơn hàng. Hỗ trợ mọi ứng dụng ngân hàng.
+                          Tự động tạo mã QR theo đơn hàng và tự động xác nhận ngay khi bạn chuyển khoản thành công.
                         </p>
                       </div>
                     </label>
 
-                    {/* Xem trước mã VietQR ngay khi chọn */}
-                    {paymentMethod === "VIETQR" && (
-                      <div className="border border-black bg-white p-4 flex flex-col sm:flex-row items-center gap-4">
-                        <img
-                          src={getVietQrUrl(null)}
-                          alt="VietQR Preview"
-                          className="w-36 h-36 object-contain border border-zinc-200 p-1 shrink-0"
-                        />
-                        <div className="space-y-1 text-[11px]">
-                          <div className="font-black uppercase text-xs">Thông tin tài khoản nhận tiền</div>
-                          <div>Ngân hàng: <b>{siteConfig.bankId || "MB"}</b></div>
-                          <div>Số tài khoản: <b className="font-mono">{siteConfig.bankAccountNo}</b></div>
-                          <div>Chủ TK: <b className="uppercase">{siteConfig.bankAccountName}</b></div>
-                          <div>Số tiền: <b className="text-black">{formatVND(finalTotal)}</b></div>
-                          <div className="text-zinc-500">
-                            (Bấm "Hoàn Tất Đặt Hàng" để lấy mã đơn hàng chính thức)
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Lựa chọn 3: Chốt đơn qua Zalo */}
                     <label
                       onClick={() => setPaymentMethod("ZALO")}
                       className={`flex items-start gap-3 p-3.5 border-2 cursor-pointer transition ${
-                        paymentMethod === "ZALO" ? "border-black bg-zinc-50" : "border-zinc-200 hover:border-zinc-400"
+                        paymentMethod === "ZALO" ? "border-black bg-zinc-50" : "border-zinc-200"
                       }`}
                     >
                       <input
@@ -1832,21 +1890,16 @@ export default function App() {
                         <div className="font-black uppercase flex items-center gap-1.5">
                           <Phone className="w-4 h-4" /> Lưu đơn & Chuyển sang Chat Zalo
                         </div>
-                        <p className="text-zinc-500 mt-0.5">
-                          Tự động sao chép chi tiết đơn hàng và mở khung chat Zalo chính thức của ChuD Authentic.
-                        </p>
                       </div>
                     </label>
                   </div>
                 </div>
 
-                {/* Cột phải: Tóm tắt sản phẩm & Nút Hoàn Tất Đặt Hàng */}
                 <div className="md:col-span-5 bg-zinc-50 border border-zinc-200 p-5 flex flex-col justify-between space-y-4">
                   <div className="space-y-3">
                     <div className="font-black uppercase tracking-wider text-sm border-b border-zinc-200 pb-2">
                       Tóm Tắt Đơn Hàng ({cart.reduce((s, i) => s + i.qty, 0)} món)
                     </div>
-
                     <div className="max-h-60 overflow-y-auto space-y-3 pr-1">
                       {cart.map((item) => (
                         <div key={item.itemKey} className="flex gap-2.5 border-b border-zinc-200 pb-2.5">
@@ -1869,7 +1922,7 @@ export default function App() {
                       </div>
                       {discountAmount > 0 && (
                         <div className="flex justify-between text-emerald-600 font-bold">
-                          <span>Mã giảm giá ({discountPercent}%):</span>
+                          <span>Giảm giá ({discountPercent}%):</span>
                           <span>-{formatVND(discountAmount)}</span>
                         </div>
                       )}
@@ -1892,12 +1945,10 @@ export default function App() {
                     className="w-full bg-black text-white py-4 font-black uppercase tracking-[0.18em] hover:bg-zinc-800 transition disabled:opacity-50"
                   >
                     {isSubmittingOrder
-                      ? "Đang Xử Lý Đơn Hàng..."
+                      ? "Đang Tạo Đơn & Mã QR..."
                       : paymentMethod === "VIETQR"
                       ? "Hoàn Tất & Lấy Mã VietQR"
-                      : paymentMethod === "COD"
-                      ? "Hoàn Tất Đặt Hàng (COD)"
-                      : "Hoàn Tất & Mở Zalo"}
+                      : "Hoàn Tất Đặt Hàng"}
                   </button>
                 </div>
               </form>
@@ -1906,15 +1957,89 @@ export default function App() {
         </div>
       )}
 
-      {/* ================================================================= */}
-      {/* MODAL QUẢN LÝ ĐƠN HÀNG DÀNH CHO ADMIN */}
-      {/* ================================================================= */}
+      {/* MODAL CẤU HÌNH MBBANK & SEPAY DÀNH CHO ADMIN */}
+      {isBankModalOpen && isAdmin && (
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white text-black max-w-lg w-full p-6 border-2 border-black space-y-4 text-xs my-8">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <h3 className="font-black uppercase tracking-wider text-sm flex items-center gap-2">
+                <Building2 className="w-4 h-4" /> Cấu Hình Tài Khoản Hộ Kinh Doanh & SePay
+              </h3>
+              <button onClick={() => setIsBankModalOpen(false)}>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="font-bold block mb-1">SePay API Token (Tự động xác nhận thanh toán)</label>
+                <input
+                  type="text"
+                  value={siteConfig.sepayApiToken || ""}
+                  onChange={(e) => setSiteConfig({ ...siteConfig, sepayApiToken: e.target.value })}
+                  placeholder="Dán mã API Token SePay..."
+                  className="w-full border border-zinc-300 px-3 py-2 font-mono bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">Ngân hàng nhận tiền</label>
+                <select
+                  value={siteConfig.bankId || "MB"}
+                  onChange={(e) => setSiteConfig({ ...siteConfig, bankId: e.target.value })}
+                  className="w-full border border-zinc-300 px-3 py-2 font-bold bg-white"
+                >
+                  {POPULAR_BANKS.map((b) => (
+                    <option key={b.code} value={b.code}>
+                      {b.code} — {b.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">Số tài khoản Hộ Kinh Doanh</label>
+                <input
+                  type="text"
+                  value={siteConfig.bankAccountNo || ""}
+                  onChange={(e) => setSiteConfig({ ...siteConfig, bankAccountNo: e.target.value })}
+                  className="w-full border border-zinc-300 px-3 py-2 font-mono font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">Tên chủ tài khoản</label>
+                <input
+                  type="text"
+                  value={siteConfig.bankAccountName || ""}
+                  onChange={(e) =>
+                    setSiteConfig({ ...siteConfig, bankAccountName: e.target.value.toUpperCase() })
+                  }
+                  className="w-full border border-zinc-300 px-3 py-2 uppercase font-bold"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                saveToSupabase(siteConfig, products);
+                setIsBankModalOpen(false);
+              }}
+              className="w-full bg-black text-white py-3 font-black uppercase tracking-wider"
+            >
+              Lưu Cấu Hình Lên Cloud
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL QUẢN LÝ ĐƠN HÀNG (ADMIN) */}
       {isOrdersModalOpen && isAdmin && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white text-black max-w-4xl w-full p-6 border-2 border-black space-y-4 my-8 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
               <h3 className="font-black uppercase tracking-wider text-sm flex items-center gap-2">
-                <Package className="w-4 h-4" /> Danh Sách Đơn Hàng Khách Đặt ({(siteConfig.orders || []).length})
+                <Package className="w-4 h-4" /> Danh Sách Đơn Hàng ({(siteConfig.orders || []).length})
               </h3>
               <button onClick={() => setIsOrdersModalOpen(false)}>
                 <X className="w-5 h-5" />
@@ -1944,7 +2069,7 @@ export default function App() {
                         >
                           <option value="Mới đặt">Mới đặt</option>
                           <option value="Chờ chuyển khoản">Chờ chuyển khoản</option>
-                          <option value="Đã thanh toán">Đã thanh toán</option>
+                          <option value="Đã thanh toán (SePay Auto)">Đã thanh toán (SePay Auto)</option>
                           <option value="Đang giao hàng">Đang giao hàng</option>
                           <option value="Hoàn thành">Hoàn thành</option>
                           <option value="Đã hủy">Đã hủy</option>
@@ -1952,7 +2077,6 @@ export default function App() {
                         <button
                           onClick={() => handleDeleteOrder(ord.id)}
                           className="text-rose-600 p-1 hover:bg-rose-50"
-                          title="Xóa đơn"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1989,78 +2113,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ================================================================= */}
-      {/* MODAL CẤU HÌNH TÀI KHOẢN NGÂN HÀNG VIETQR (ADMIN) */}
-      {/* ================================================================= */}
-      {isBankModalOpen && isAdmin && (
-        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
-          <div className="bg-white text-black max-w-md w-full p-6 border-2 border-black space-y-4 text-xs">
-            <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
-              <h3 className="font-black uppercase tracking-wider text-sm flex items-center gap-2">
-                <Building2 className="w-4 h-4" /> Cấu Hình Tài Khoản Nhận Tiền VietQR
-              </h3>
-              <button onClick={() => setIsBankModalOpen(false)}>
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="font-bold uppercase block mb-1">Ngân hàng (Mã VietQR)</label>
-                <select
-                  value={siteConfig.bankId || "MB"}
-                  onChange={(e) => setSiteConfig({ ...siteConfig, bankId: e.target.value })}
-                  className="w-full border border-zinc-300 px-3 py-2 font-bold bg-white"
-                >
-                  {POPULAR_BANKS.map((b) => (
-                    <option key={b.code} value={b.code}>
-                      {b.code} — {b.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="font-bold uppercase block mb-1">Số tài khoản nhận tiền</label>
-                <input
-                  type="text"
-                  value={siteConfig.bankAccountNo || ""}
-                  onChange={(e) => setSiteConfig({ ...siteConfig, bankAccountNo: e.target.value })}
-                  placeholder="Nhập số tài khoản..."
-                  className="w-full border border-zinc-300 px-3 py-2 font-mono font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold uppercase block mb-1">Tên chủ tài khoản (Không dấu)</label>
-                <input
-                  type="text"
-                  value={siteConfig.bankAccountName || ""}
-                  onChange={(e) =>
-                    setSiteConfig({ ...siteConfig, bankAccountName: e.target.value.toUpperCase() })
-                  }
-                  placeholder="VD: CHU DUNG CO"
-                  className="w-full border border-zinc-300 px-3 py-2 uppercase font-bold"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200">
-              <button
-                onClick={() => {
-                  saveToSupabase(siteConfig, products);
-                  setIsBankModalOpen(false);
-                }}
-                className="w-full bg-black text-white py-3 font-black uppercase tracking-wider"
-              >
-                Lưu Cấu Hình VietQR Lên Cloud
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL ĐĂNG NHẬP PIN ADMIN */}
+      {/* MODAL PIN ADMIN */}
       {isPinModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
           <form
@@ -2094,7 +2147,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL THÊM / SỬA SẢN PHẨM CHI TIẾT (ADMIN) */}
+      {/* MODAL THÊM / SỬA SẢN PHẨM ĐẦY ĐỦ */}
       {isProductModalOpen && editingProduct && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
           <form
@@ -2167,9 +2220,7 @@ export default function App() {
               </div>
 
               <div>
-                <label className="font-bold uppercase block mb-1">
-                  Các màu sắc (Cách nhau bằng dấu phẩy)
-                </label>
+                <label className="font-bold uppercase block mb-1">Các màu sắc (Cách nhau dấu phẩy)</label>
                 <input
                   type="text"
                   value={colorsInput}
@@ -2206,11 +2257,12 @@ export default function App() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold uppercase block mb-1">Chất liệu</label>
+                  <label className="font-bold uppercase block mb-1">Chất liệu (Trang chi tiết)</label>
                   <input
                     type="text"
                     value={editingProduct.material || ""}
                     onChange={(e) => setEditingProduct({ ...editingProduct, material: e.target.value })}
+                    placeholder="VD: 100% Cotton 250gsm"
                     className="w-full border border-zinc-300 px-3 py-2"
                   />
                 </div>
@@ -2220,6 +2272,7 @@ export default function App() {
                     type="text"
                     value={editingProduct.fit || ""}
                     onChange={(e) => setEditingProduct({ ...editingProduct, fit: e.target.value })}
+                    placeholder="VD: Oversized Fit"
                     className="w-full border border-zinc-300 px-3 py-2"
                   />
                 </div>
@@ -2238,12 +2291,13 @@ export default function App() {
 
               <div>
                 <label className="font-bold uppercase block mb-1">
-                  Các link ảnh phụ (Mỗi dòng 1 link)
+                  Các link ảnh phụ ở trang chi tiết (Mỗi dòng 1 link ảnh)
                 </label>
                 <textarea
                   rows={2}
                   value={galleryInput}
                   onChange={(e) => setGalleryInput(e.target.value)}
+                  placeholder="Dán thêm các link ảnh góc chụp khác (mỗi dòng 1 link)..."
                   className="w-full border border-zinc-300 px-3 py-2"
                 />
               </div>

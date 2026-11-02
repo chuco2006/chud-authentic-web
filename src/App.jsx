@@ -1968,16 +1968,14 @@ export default function App() {
                     1. Thông Tin Người Nhận Hàng
                   </div>
 
-               <div>
-                <label className="font-bold uppercase block mb-1">
-                  Nhãn nổi bật góc ảnh (HOT DROP, BEST SELLER, SALE... hoặc để trống)
-                </label>
+                <div>
+                <label className="font-bold uppercase block mb-1">Tên sản phẩm *</label>
                 <input
                   type="text"
-                  value={editingProduct.tag || ""}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, tag: e.target.value.toUpperCase() })}
-                  placeholder="Ví dụ: HOT DROP, BEST SELLER, NEW ARRIVAL..."
-                  className="w-full border border-zinc-300 px-3 py-2 font-bold uppercase"
+                  required
+                  value={editingProduct.name}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                  className="w-full border border-zinc-300 px-3 py-2"
                 />
               </div>
 
@@ -2420,6 +2418,19 @@ export default function App() {
                   value={editingProduct.name}
                   onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
                   className="w-full border border-zinc-300 px-3 py-2"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold uppercase block mb-1">
+                  Nhãn nổi bật góc ảnh (HOT DROP, BEST SELLER, SALE... hoặc để trống)
+                </label>
+                <input
+                  type="text"
+                  value={editingProduct.tag || ""}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, tag: e.target.value.toUpperCase() })}
+                  placeholder="Ví dụ: HOT DROP, BEST SELLER, NEW ARRIVAL..."
+                  className="w-full border border-zinc-300 px-3 py-2 font-bold uppercase"
                 />
               </div>
 

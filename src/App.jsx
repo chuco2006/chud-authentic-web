@@ -1962,22 +1962,23 @@ export default function App() {
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleConfirmOrder} className="grid grid-cols-1 md:grid-cols-12 gap-8 text-xs">
+                <form onSubmit={handleConfirmOrder} className="grid grid-cols-1 md:grid-cols-12 gap-8 text-xs">
                 <div className="md:col-span-7 space-y-4">
                   <div className="font-black uppercase tracking-wider text-sm border-b border-zinc-200 pb-2">
                     1. Thông Tin Người Nhận Hàng
                   </div>
 
-                <div>
-                <label className="font-bold uppercase block mb-1">Tên sản phẩm *</label>
-                <input
-                  type="text"
-                  required
-                  value={editingProduct.name}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                  className="w-full border border-zinc-300 px-3 py-2"
-                />
-              </div>
+                  <div>
+                    <label className="font-bold uppercase block mb-1">Họ và tên người nhận *</label>
+                    <input
+                      type="text"
+                      required
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Nhập họ và tên..."
+                      className="w-full border border-zinc-300 px-3.5 py-2.5 focus:outline-none focus:border-black"
+                    />
+                  </div>
 
                   <div>
                     <label className="font-bold uppercase block mb-1">Số điện thoại liên hệ *</label>

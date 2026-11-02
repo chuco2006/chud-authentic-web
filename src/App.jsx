@@ -4,7 +4,7 @@ import {
   SlidersHorizontal, Ruler, ShieldCheck, Truck, RefreshCw,
   Lock, Unlock, Cloud, CloudOff, Copy, Sparkles, ArrowRight,
   ChevronRight, Phone, Mail, Globe, CheckCircle2, ArrowLeft,
-  CreditCard, QrCode, Package, MapPin, User, FileText, Building2
+  CreditCard, QrCode, Package, MapPin, User, FileText, Building2, FileSpreadsheet
 } from 'lucide-react';
 
 // ==========================================
@@ -22,96 +22,104 @@ const DEFAULT_SITE_CONFIG = {
   brandName: "CHUD AUTHENTIC",
   heroTag: "MONOCHROME ARCHIVE // 2026 COLLECTION",
   heroTitle: "STREETWEAR AUTHENTIC CHUẨN MỰC ĐEN & TRẮNG",
-  heroSubtitle: "Tuyển tập New Era, MLB, Essentials Fear of God chính hãng. Phong cách tối giản, form dáng chuẩn streetwear.",
+  heroSubtitle: "Tuyển tập Stussy, MLB, Adidas, Nike, Essentials chính hãng. Phong cách tối giản, form dáng chuẩn streetwear.",
   heroCta: "KHÁM PHÁ KỆ HÀNG",
   hotline: "+84 356 926 605",
   email: "chucospktk24@gmail.com",
   domain: "chudauthentic.store",
   address: "TP. Hồ Chí Minh, Việt Nam",
+  // Tài khoản Hộ kinh doanh MBBank & SePay
   bankId: "MB",
   bankAccountNo: "20069696969696",
   bankAccountName: "HO KINH DOANH CHUD",
   sepayApiToken: "2XUGLIKPNDP8EXLMHSWSEI11LYCYG5QQQ9UKGW9FOVYL7MOPEWCNMJ46HSNS53PZ",
+  // Cấu hình đồng bộ tự động Google Sheets (5 trang GID của bạn)
+  sheetUrl: "https://docs.google.com/spreadsheets/d/1ckYtsDySTIMYgWy-QEJ-bMyN-QcEkPIfN49Iu-9_Ptw/edit",
+  sheetGids: "1599511117, 118702566, 1380208994, 1458127387, 447218553",
   orders: []
 };
 
 const DEFAULT_PRODUCTS = [
   {
     id: 1,
-    name: "New Era NY Yankees 59FIFTY Fitted Cap",
-    brand: "New Era",
-    category: "Nón",
-    price: 1150000,
-    originalPrice: 1350000,
-    tag: "BEST SELLER",
-    image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=900&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?auto=format&fit=crop&w=900&q=80"
-    ],
-    colors: ["Đen / Logo Trắng", "Trắng / Logo Đen"],
-    sizes: ["7", "7 1/8", "7 1/4", "7 3/8", "7 1/2"],
-    material: "100% Polyester Wool cao cấp đứng form",
-    fit: "59FIFTY Fitted (Bít đuôi chuẩn vòng đầu)",
-    description: "Nón New Era 59FIFTY Fitted chính hãng logo New York Yankees thêu nổi 3D sắc nét. Đầy đủ tem vàng hologram trên lưỡi trai và tag nội địa chuẩn Authentic."
-  },
-  {
-    id: 2,
-    name: "New Era LA Dodgers 9FORTY Adjustable Cap",
-    brand: "New Era",
-    category: "Nón",
-    price: 890000,
-    originalPrice: 1050000,
-    tag: "HOT DROP",
-    image: "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?auto=format&fit=crop&w=900&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?auto=format&fit=crop&w=900&q=80"
-    ],
-    colors: ["Đen Tuyền", "Trắng Kem"],
-    sizes: ["FREE SIZE"],
-    material: "100% Cotton Twill thoáng khí",
-    fit: "9FORTY Adjustable (Khóa cài điều chỉnh vòng đầu)",
-    description: "Dòng 9FORTY form cứng cáp ôm đầu, lưỡi trai cong sẵn dễ đội, khóa kim loại khắc logo sau gáy giúp tùy chỉnh linh hoạt cho mọi kích cỡ vòng đầu."
-  },
-  {
-    id: 3,
-    name: "MLB NY Yankees Monogram Oversized Tee",
-    brand: "MLB",
+    sku: "1904894",
+    name: "Stussy Basic Logo Oversized Tee",
+    brand: "Stussy",
     category: "Áo",
-    price: 1450000,
-    originalPrice: 1690000,
-    tag: "AUTHENTIC",
+    price: 1350000,
+    originalPrice: 1590000,
+    tag: "BEST SELLER",
     image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
       "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=900&q=80"
     ],
     colors: ["Đen", "Trắng"],
+    sizes: ["M", "L", "XL"],
+    material: "100% Cotton cao cấp chính hãng",
+    fit: "Oversized Streetwear Fit",
+    description: "Áo thun Stussy chính hãng nguyên tem tag, tự động cập nhật tồn kho size theo mã sản phẩm."
+  },
+  {
+    id: 2,
+    sku: "",
+    name: "Adidas Adilette Comfort / Yeezy Slide Authentic",
+    brand: "Adidas",
+    category: "Dép",
+    price: 950000,
+    originalPrice: 1250000,
+    tag: "HOT DROP",
+    image: "https://images.unsplash.com/photo-1603487742131-4160ec999306?auto=format&fit=crop&w=900&q=80",
+    gallery: [
+      "https://images.unsplash.com/photo-1603487742131-4160ec999306?auto=format&fit=crop&w=900&q=80"
+    ],
+    colors: ["Đen (Onyx)", "Kem (Bone)"],
+    sizes: ["38", "39", "40", "41", "42", "43"],
+    material: "EVA Foam đúc nguyên khối siêu êm",
+    fit: "Form chuẩn (Chân bè tăng 1 size)",
+    description: "Dép chính hãng nguyên hộp, đệm êm chống trượt, phù hợp mang hàng ngày."
+  },
+  {
+    id: 3,
+    sku: "",
+    name: "MLB NY Yankees Monogram Oversized Tee",
+    brand: "MLB",
+    category: "Áo",
+    price: 1450000,
+    originalPrice: 1690000,
+    tag: "AUTHENTIC",
+    image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=900&q=80",
+    gallery: [
+      "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=900&q=80"
+    ],
+    colors: ["Đen", "Trắng"],
     sizes: ["S", "M", "L", "XL"],
-    material: "100% Cotton 250gsm dày dặn, chống bai dão cổ áo",
-    fit: "Oversized Fit (Form rộng trễ vai chuẩn Hàn Quốc)",
-    description: "Áo thun MLB New York Yankees chính hãng nguyên tag, hỗ trợ check HiddenTag. Chất vải cotton đanh mịn, thấm hút mồ hôi cực tốt."
+    material: "100% Cotton 250gsm dày dặn",
+    fit: "Oversized Fit",
+    description: "Áo thun MLB chính hãng nguyên tag, hỗ trợ check HiddenTag."
   },
   {
     id: 4,
+    sku: "",
     name: "Fear of God Essentials Boxy Tee",
     brand: "Essentials",
     category: "Áo",
     price: 1550000,
     originalPrice: 1850000,
     tag: "LIMITED",
-    image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=900&q=80",
+    image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=900&q=80",
     gallery: [
-      "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=900&q=80"
+      "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=900&q=80"
     ],
-    colors: ["Đen (Stretch Limo)", "Trắng Kem (Light Oatmeal)", "Xám Đậm"],
+    colors: ["Đen (Stretch Limo)", "Trắng Kem (Light Oatmeal)"],
     sizes: ["S", "M", "L", "XL"],
     material: "Heavyweight Jersey Cotton 100%",
-    fit: "Boxy Oversized (Chiều ngang rộng, bo cổ dày)",
-    description: "Áo thun Essentials form boxy đặc trưng, logo cao su đúc nổi tối giản trước ngực và tag cao su sau cổ áo. Đi kèm túi zip dustbag chính hãng."
+    fit: "Boxy Oversized",
+    description: "Áo thun Essentials form boxy đặc trưng, đi kèm túi zip dustbag chính hãng."
   },
   {
     id: 5,
+    sku: "",
     name: "MLB LA Dodgers Heavyweight Hoodie",
     brand: "MLB",
     category: "Hoodie",
@@ -126,10 +134,11 @@ const DEFAULT_PRODUCTS = [
     sizes: ["M", "L", "XL"],
     material: "Nỉ Cotton French Terry 380gsm đứng form",
     fit: "Relaxed Oversized Fit",
-    description: "Áo khoác nỉ Hoodie MLB LA Dodgers với phần mũ 2 lớp to bản đứng dáng. Bo tay và bo gấu áo dệt gân chắc chắn, phù hợp mặc thu đông hoặc khoác ngoài."
+    description: "Áo khoác nỉ Hoodie MLB LA Dodgers với phần mũ 2 lớp to bản đứng dáng."
   },
   {
     id: 6,
+    sku: "",
     name: "Essentials Fear Of God Sweatshorts",
     brand: "Essentials",
     category: "Quần",
@@ -143,12 +152,16 @@ const DEFAULT_PRODUCTS = [
     colors: ["Đen (Jet Black)", "Xám (Heather Grey)"],
     sizes: ["S", "M", "L"],
     material: "80% Cotton, 20% Polyester Fleece dày dặn",
-    fit: "Above-Knee Relaxed (Trên gối thoải mái)",
-    description: "Quần short nỉ Essentials dây rút dài đặc trưng cùng miếng tag cao su ở đũng quần và logo Essentials phản quang dưới ống trái."
+    fit: "Above-Knee Relaxed",
+    description: "Quần short nỉ Essentials dây rút dài đặc trưng cùng logo phản quang."
   }
 ];
 
-const ALL_SIZE_OPTIONS = ["S", "M", "L", "XL", "FREE SIZE", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2"];
+// Bao gồm đầy đủ Size Áo/Quần và Size Dép (36 -> 44)
+const ALL_SIZE_OPTIONS = [
+  "S", "M", "L", "XL", "XXL", "FREE SIZE",
+  "36", "37", "38", "39", "40", "41", "42", "43", "44"
+];
 
 const POPULAR_BANKS = [
   { code: "MB", name: "MBBank (Quân Đội)" },
@@ -158,9 +171,7 @@ const POPULAR_BANKS = [
   { code: "ICB", name: "VietinBank" },
   { code: "BIDV", name: "BIDV" },
   { code: "VPB", name: "VPBank" },
-  { code: "TPB", name: "TPBank" },
-  { code: "STB", name: "Sacombank" },
-  { code: "VIB", name: "VIB" }
+  { code: "TPB", name: "TPBank" }
 ];
 
 export default function App() {
@@ -205,7 +216,7 @@ export default function App() {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [userHeight, setUserHeight] = useState(172);
   const [userWeight, setUserWeight] = useState(65);
-  const [headCircumference, setHeadCircumference] = useState(57.7);
+  const [footLength, setFootLength] = useState(25.5);
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
@@ -217,8 +228,10 @@ export default function App() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const [isBankModalOpen, setIsBankModalOpen] = useState(false);
+  const [isSheetModalOpen, setIsSheetModalOpen] = useState(false);
+  const [isSyncingSheet, setIsSyncingSheet] = useState(false);
 
-  // 1. TẢI DỮ LIỆU TỪ SUPABASE KHI MỞ WEB
+  // 1. TẢI DỮ LIỆU TỪ SUPABASE & TỰ ĐỘNG ĐỒNG BỘ SIZE TỪ GOOGLE SHEETS
   useEffect(() => {
     async function loadStoreFromSupabase() {
       try {
@@ -234,26 +247,30 @@ export default function App() {
 
         const data = await res.json();
         if (data && data.length > 0) {
-          if (data[0].site_config) {
-            const loadedCfg = data[0].site_config;
-            setSiteConfig({
-              ...DEFAULT_SITE_CONFIG,
-              ...loadedCfg,
-              bankId: loadedCfg.bankId || DEFAULT_SITE_CONFIG.bankId,
-              bankAccountNo:
-                loadedCfg.bankAccountNo && loadedCfg.bankAccountNo !== "0356926605"
-                  ? loadedCfg.bankAccountNo
-                  : DEFAULT_SITE_CONFIG.bankAccountNo,
-              bankAccountName:
-                loadedCfg.bankAccountName && loadedCfg.bankAccountName !== "CHU DUNG CO"
-                  ? loadedCfg.bankAccountName
-                  : DEFAULT_SITE_CONFIG.bankAccountName,
-              sepayApiToken: loadedCfg.sepayApiToken || DEFAULT_SITE_CONFIG.sepayApiToken
-            });
-          }
-          if (data[0].products) setProducts(data[0].products);
+          const loadedCfg = {
+            ...DEFAULT_SITE_CONFIG,
+            ...(data[0].site_config || {}),
+            bankId: data[0].site_config?.bankId || DEFAULT_SITE_CONFIG.bankId,
+            bankAccountNo:
+              data[0].site_config?.bankAccountNo && data[0].site_config?.bankAccountNo !== "0356926605"
+                ? data[0].site_config.bankAccountNo
+                : DEFAULT_SITE_CONFIG.bankAccountNo,
+            bankAccountName:
+              data[0].site_config?.bankAccountName && data[0].site_config?.bankAccountName !== "CHU DUNG CO"
+                ? data[0].site_config.bankAccountName
+                : DEFAULT_SITE_CONFIG.bankAccountName,
+            sepayApiToken: data[0].site_config?.sepayApiToken || DEFAULT_SITE_CONFIG.sepayApiToken,
+            sheetUrl: data[0].site_config?.sheetUrl || DEFAULT_SITE_CONFIG.sheetUrl,
+            sheetGids: data[0].site_config?.sheetGids || DEFAULT_SITE_CONFIG.sheetGids
+          };
+          const loadedProds = data[0].products || DEFAULT_PRODUCTS;
+
+          setSiteConfig(loadedCfg);
+          setProducts(loadedProds);
           setCloudStatus("synced");
           setStatusMsg("Đã đồng bộ Cloud");
+
+          syncInventoryFromSheet(loadedProds, loadedCfg, true);
         } else {
           await saveToSupabase(DEFAULT_SITE_CONFIG, DEFAULT_PRODUCTS);
         }
@@ -269,7 +286,65 @@ export default function App() {
     loadStoreFromSupabase();
   }, []);
 
-  // 2. TỰ ĐỘNG QUÉT GIAO DỊCH SEPAY MỖI 3 GIÂY
+  // 2. HÀM ĐỒNG BỘ TỒN KHO TỪ GOOGLE SHEETS THEO MÃ SẢN PHẨM (SKU)
+  const syncInventoryFromSheet = async (
+    currentProducts = products,
+    currentConfig = siteConfig,
+    silent = false
+  ) => {
+    if (!currentConfig.sheetUrl) return;
+    setIsSyncingSheet(true);
+    try {
+      if (!silent) setStatusMsg("Đang quét kho Google Sheets...");
+      const gids = (currentConfig.sheetGids || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      const res = await fetch("/api/sheet-sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sheetUrl: currentConfig.sheetUrl,
+          gids
+        })
+      });
+
+      if (!res.ok) throw new Error("Không kết nối được API Sheet");
+      const data = await res.json();
+      const inv = data.inventory || {};
+
+      let updatedCount = 0;
+      const updatedProducts = currentProducts.map((prod) => {
+        const sku = (prod.sku || "").toString().trim().toUpperCase();
+        if (sku && inv[sku]) {
+          const availableSizes = inv[sku].sizes.length > 0 ? inv[sku].sizes : ["HẾT HÀNG"];
+          updatedCount++;
+          return {
+            ...prod,
+            sizes: availableSizes,
+            stockDetail: inv[sku].stock
+          };
+        }
+        return prod;
+      });
+
+      if (updatedCount > 0) {
+        await saveToSupabase(currentConfig, updatedProducts);
+      }
+      if (!silent) {
+        alert(
+          `Đồng bộ thành công! Đã quét ${data.totalSkusFound || 0} mã hàng trên Sheet và cập nhật size cho ${updatedCount} sản phẩm trên web.`
+        );
+      }
+    } catch (err) {
+      if (!silent) alert("Lỗi khi đồng bộ từ Google Sheet. Hãy đảm bảo đã tạo file api/sheet-sync.js.");
+    } finally {
+      setIsSyncingSheet(false);
+    }
+  };
+
+  // 3. TỰ ĐỘNG QUÉT GIAO DỊCH SEPAY MỖI 3 GIÂY
   useEffect(() => {
     if (
       !createdOrder ||
@@ -329,7 +404,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isAdmin]);
 
-  // 3. ĐỒNG BỘ SUPABASE CLOUD
+  // 4. ĐỒNG BỘ SUPABASE CLOUD
   const saveToSupabase = async (newConfig, newProducts) => {
     setSiteConfig(newConfig);
     setProducts(newProducts);
@@ -364,7 +439,6 @@ export default function App() {
       setStatusMsg("Đã lưu máy cục bộ");
     }
   };
-
   const handleEditText = (key, label) => {
     if (!isAdmin) return;
     const currentVal = siteConfig[key] || "";
@@ -396,20 +470,21 @@ export default function App() {
     }));
   };
 
-  // 4. QUẢN TRỊ SẢN PHẨM (ADMIN)
+  // 5. QUẢN TRỊ SẢN PHẨM (ADMIN)
   const openAddProductModal = () => {
     const newProd = {
       id: Date.now(),
+      sku: "",
       name: "",
-      brand: "New Era",
-      category: "Nón",
+      brand: "Stussy",
+      category: "Áo",
       price: 950000,
       originalPrice: 1200000,
       tag: "NEW ARRIVAL",
-      image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=900&q=80",
+      image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
       gallery: [],
       colors: ["Đen", "Trắng"],
-      sizes: ["FREE SIZE"],
+      sizes: ["S", "M", "L", "XL"],
       material: "100% Cotton chính hãng",
       fit: "Standard Streetwear Fit",
       description: "Sản phẩm chính hãng phân phối bởi ChuD Authentic."
@@ -427,7 +502,7 @@ export default function App() {
     setIsProductModalOpen(true);
   };
 
-  const handleSaveProductForm = (e) => {
+  const handleSaveProductForm = async (e) => {
     e.preventDefault();
     if (!editingProduct.name.trim()) return;
 
@@ -442,6 +517,7 @@ export default function App() {
 
     const finalProd = {
       ...editingProduct,
+      sku: (editingProduct.sku || "").trim().toUpperCase(),
       colors: parsedColors.length > 0 ? parsedColors : ["Tiêu chuẩn"],
       gallery: parsedGallery.length > 0 ? parsedGallery : [editingProduct.image]
     };
@@ -451,7 +527,12 @@ export default function App() {
       ? products.map((p) => (p.id === finalProd.id ? finalProd : p))
       : [finalProd, ...products];
 
-    saveToSupabase(siteConfig, updatedProducts);
+    await saveToSupabase(siteConfig, updatedProducts);
+
+    if (finalProd.sku) {
+      syncInventoryFromSheet(updatedProducts, siteConfig, true);
+    }
+
     if (activeProduct && activeProduct.id === finalProd.id) {
       setActiveProduct(finalProd);
     }
@@ -485,7 +566,7 @@ export default function App() {
     reader.readAsDataURL(file);
   };
 
-  // 5. BỘ LỌC & GIỎ HÀNG
+  // 6. BỘ LỌC TỰ ĐỘNG THEO THƯƠNG HIỆU & DANH MỤC
   const categories = useMemo(() => ["Tất cả", ...new Set(products.map((p) => p.category))], [products]);
   const brands = useMemo(() => ["Tất cả", ...new Set(products.map((p) => p.brand))], [products]);
 
@@ -495,7 +576,8 @@ export default function App() {
         const matchQuery =
           p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.category.toLowerCase().includes(searchQuery.toLowerCase());
+          p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (p.sku && p.sku.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchCat = selectedCategory === "Tất cả" || p.category === selectedCategory;
         const matchBrand = selectedBrand === "Tất cả" || p.brand === selectedBrand;
         const matchSize = selectedSize === "Tất cả" || (p.sizes && p.sizes.includes(selectedSize));
@@ -510,6 +592,10 @@ export default function App() {
 
   const addToCart = (product, size, color, qty = 1, openDrawer = true) => {
     const chosenSize = size || product.sizes?.[0] || "FREE SIZE";
+    if (chosenSize === "HẾT HÀNG") {
+      alert("Sản phẩm này hiện đang tạm hết size trên kho.");
+      return;
+    }
     const chosenColor = color || product.colors?.[0] || "Tiêu chuẩn";
     const itemKey = `${product.id}-${chosenSize}-${chosenColor}`;
 
@@ -568,12 +654,12 @@ export default function App() {
 
   const formatVND = (num) => Number(num || 0).toLocaleString("vi-VN") + "đ";
 
-  // 6. XỬ LÝ ĐẶT HÀNG (COD, SEPAY VIETQR & ZALO)
+  // 7. XỬ LÝ ĐẶT HÀNG
   const buildZaloMessage = (orderObj) => {
     const itemsList = orderObj.items
       .map(
         (item, idx) =>
-          `${idx + 1}. ${item.name} [Màu: ${item.color} | Size: ${item.size}] x${item.qty} = ${formatVND(
+          `${idx + 1}. ${item.name} ${item.sku ? `[Mã: ${item.sku}] ` : ""}[Màu: ${item.color} | Size: ${item.size}] x${item.qty} = ${formatVND(
             item.price * item.qty
           )}`
       )
@@ -650,6 +736,7 @@ export default function App() {
       status: paymentMethod === "VIETQR" ? "Chờ chuyển khoản" : "Mới đặt",
       items: cart.map((i) => ({
         id: i.id,
+        sku: i.sku || "",
         name: i.name,
         size: i.size,
         color: i.color,
@@ -731,13 +818,18 @@ export default function App() {
     return "XL";
   }, [userHeight, userWeight]);
 
-  const recommendedNewEraSize = useMemo(() => {
-    if (headCircumference <= 55.8) return "7 (55.8 cm)";
-    if (headCircumference <= 56.8) return "7 1/8 (56.8 cm)";
-    if (headCircumference <= 57.7) return "7 1/4 (57.7 cm)";
-    if (headCircumference <= 58.7) return "7 3/8 (58.7 cm)";
-    return "7 1/2 (59.6 cm)";
-  }, [headCircumference]);
+  // Bảng tính kích thước dép theo chiều dài bàn chân
+  const recommendedSlideSize = useMemo(() => {
+    if (footLength <= 22.8) return "Size 36 (230mm / 4 UK)";
+    if (footLength <= 23.5) return "Size 37 (235mm / 4.5 UK)";
+    if (footLength <= 24.2) return "Size 38 (240mm / 5 UK)";
+    if (footLength <= 24.8) return "Size 39 (250mm / 6 UK)";
+    if (footLength <= 25.5) return "Size 40 - 40.5 (255mm / 7 UK)";
+    if (footLength <= 26.2) return "Size 41 (260mm / 7.5 UK)";
+    if (footLength <= 26.8) return "Size 42 (270mm / 8 UK)";
+    if (footLength <= 27.5) return "Size 43 (275mm / 9 UK)";
+    return "Size 44 (280mm / 10 UK)";
+  }, [footLength]);
 
   const handleVerifyPin = (e) => {
     e.preventDefault();
@@ -750,9 +842,9 @@ export default function App() {
       setPinError("Mã PIN không chính xác.");
     }
   };
+
   return (
     <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white">
-      {/* THÔNG BÁO KHI THÊM GIỎ HÀNG */}
       {addedToast && (
         <div className="fixed bottom-6 right-6 z-50 bg-black text-white px-5 py-3.5 text-xs font-bold uppercase tracking-wider shadow-2xl flex items-center gap-2 border border-white/20">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -783,6 +875,20 @@ export default function App() {
               <Plus className="w-3.5 h-3.5" /> Thêm Sản Phẩm
             </button>
             <button
+              onClick={() => syncInventoryFromSheet(products, siteConfig, false)}
+              disabled={isSyncingSheet}
+              className="bg-emerald-600 text-white px-3 py-1.5 font-bold uppercase tracking-wider hover:bg-emerald-500 transition flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncingSheet ? "animate-spin" : ""}`} />
+              Đồng Bộ Kho Sheet
+            </button>
+            <button
+              onClick={() => setIsSheetModalOpen(true)}
+              className="border border-zinc-600 px-3 py-1.5 font-bold uppercase tracking-wider hover:border-white transition flex items-center gap-1"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" /> Link Google Sheets
+            </button>
+            <button
               onClick={() => setIsOrdersModalOpen(true)}
               className="bg-amber-400 text-black px-3 py-1.5 font-black uppercase tracking-wider hover:bg-amber-300 transition flex items-center gap-1.5"
             >
@@ -793,12 +899,6 @@ export default function App() {
               className="border border-zinc-600 px-3 py-1.5 font-bold uppercase tracking-wider hover:border-white transition flex items-center gap-1"
             >
               <QrCode className="w-3.5 h-3.5" /> Cấu Hình MBBank & SePay
-            </button>
-            <button
-              onClick={() => saveToSupabase(siteConfig, products)}
-              className="border border-zinc-600 px-3 py-1.5 font-medium hover:border-white transition"
-            >
-              Đồng bộ ngay
             </button>
             <button
               onClick={() => setIsAdmin(false)}
@@ -864,7 +964,7 @@ export default function App() {
             >
               <span className="flex items-center gap-2 truncate">
                 <Search className="w-3.5 h-3.5 text-black shrink-0" />
-                {searchQuery || "Tìm New Era, MLB, Size..."}
+                {searchQuery || "Tìm Stussy, Dép, Mã SP, Size..."}
               </span>
               <kbd className="hidden sm:inline-block bg-white px-1.5 py-0.5 text-[10px] font-mono border border-zinc-300">
                 ⌘K
@@ -875,7 +975,7 @@ export default function App() {
               onClick={() => setIsSizeGuideOpen(true)}
               className="hidden sm:flex items-center gap-1.5 border border-black px-3 py-2 text-xs font-bold uppercase tracking-wider hover:bg-black hover:text-white transition"
             >
-              <Ruler className="w-3.5 h-3.5" /> Bảng Size
+              <Ruler className="w-3.5 h-3.5" /> Bảng Size Áo & Dép
             </button>
 
             <button
@@ -888,9 +988,8 @@ export default function App() {
           </div>
         </div>
       </header>
-
       {/* ================================================================= */}
-      {/* MÀN HÌNH 1: TRANG CHI TIẾT SẢN PHẨM ĐẦY ĐỦ (KHI CLICK VÀO SP) */}
+      {/* MÀN HÌNH 1: CHI TIẾT SẢN PHẨM HOẶC MÀN HÌNH 2: TRANG CHỦ & KỆ HÀNG */}
       {/* ================================================================= */}
       {activeProduct ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -903,7 +1002,7 @@ export default function App() {
             </button>
 
             <div className="text-xs text-zinc-400 uppercase tracking-wider hidden sm:block">
-              Trang chủ / {activeProduct.category} / <span className="text-black font-bold">{activeProduct.name}</span>
+              Trang chủ / {activeProduct.brand} / <span className="text-black font-bold">{activeProduct.name}</span>
             </div>
 
             {isAdmin && (
@@ -917,7 +1016,7 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            {/* Bộ ảnh Gallery bên trái */}
+            {/* Gallery ảnh */}
             <div className="lg:col-span-7 space-y-4">
               <div className="aspect-[4/5] bg-zinc-100 border border-zinc-200 overflow-hidden relative">
                 {activeProduct.tag && (
@@ -953,13 +1052,18 @@ export default function App() {
               )}
             </div>
 
-            {/* Thông tin chi tiết & Chọn Màu / Size / Mua hàng bên phải */}
+            {/* Chi tiết đặt hàng */}
             <div className="lg:col-span-5 space-y-6">
               <div>
                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400">
                   <span>{activeProduct.brand}</span>
                   <span>•</span>
                   <span>{activeProduct.category}</span>
+                  {activeProduct.sku && (
+                    <span className="bg-zinc-100 text-black px-2 py-0.5 rounded font-mono">
+                      Mã: {activeProduct.sku}
+                    </span>
+                  )}
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight mt-2 leading-tight">
                   {activeProduct.name}
@@ -984,7 +1088,7 @@ export default function App() {
                 {activeProduct.description || "Sản phẩm chính hãng phân phối bởi ChuD Authentic."}
               </p>
 
-              {/* 1. Chọn Màu sắc */}
+              {/* 1. Chọn Màu */}
               <div className="space-y-2.5">
                 <div className="flex justify-between text-xs uppercase tracking-wider">
                   <span className="font-bold text-zinc-500">1. Chọn Màu Sắc:</span>
@@ -1010,11 +1114,11 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 2. Chọn Size */}
+              {/* 2. Chọn Size (Tự động cập nhật theo Kho Sheet) */}
               <div className="space-y-2.5">
                 <div className="flex justify-between items-center text-xs uppercase tracking-wider">
                   <span>
-                    <span className="font-bold text-zinc-500">2. Chọn Kích Cỡ (Size): </span>
+                    <span className="font-bold text-zinc-500">2. Chọn Size hiện còn: </span>
                     <strong className="text-black">{detailSize}</strong>
                   </span>
                   <button
@@ -1025,23 +1129,29 @@ export default function App() {
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {(activeProduct.sizes || ["FREE SIZE"]).map((sz) => (
-                    <button
-                      key={sz}
-                      onClick={() => setDetailSize(sz)}
-                      className={`min-w-[52px] px-4 py-2.5 text-xs font-black uppercase tracking-wider border transition ${
-                        detailSize === sz
-                          ? "bg-black text-white border-black"
-                          : "bg-white text-black border-zinc-300 hover:border-black"
-                      }`}
-                    >
-                      {sz}
-                    </button>
-                  ))}
+                  {(activeProduct.sizes || ["FREE SIZE"]).map((sz) => {
+                    const isOutOfStock = sz === "HẾT HÀNG";
+                    return (
+                      <button
+                        key={sz}
+                        disabled={isOutOfStock}
+                        onClick={() => setDetailSize(sz)}
+                        className={`min-w-[52px] px-4 py-2.5 text-xs font-black uppercase tracking-wider border transition ${
+                          isOutOfStock
+                            ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed"
+                            : detailSize === sz
+                            ? "bg-black text-white border-black"
+                            : "bg-white text-black border-zinc-300 hover:border-black"
+                        }`}
+                      >
+                        {sz}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* 3. Số lượng & Nút Thao tác */}
+              {/* 3. Số lượng & Mua */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center border border-black">
@@ -1061,9 +1171,7 @@ export default function App() {
                   </div>
 
                   <button
-                    onClick={() =>
-                      addToCart(activeProduct, detailSize, detailColor, detailQty, true)
-                    }
+                    onClick={() => addToCart(activeProduct, detailSize, detailColor, detailQty, true)}
                     className="flex-1 bg-black text-white py-3.5 px-6 text-xs font-black uppercase tracking-[0.18em] hover:bg-zinc-800 transition flex items-center justify-center gap-2"
                   >
                     <ShoppingBag className="w-4 h-4" /> Thêm Vào Giỏ Hàng
@@ -1082,7 +1190,7 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Bảng Thông số chi tiết */}
+              {/* Thông số kỹ thuật */}
               <div className="bg-zinc-50 border border-zinc-200 p-5 space-y-3 text-xs mt-6">
                 <div className="font-black uppercase tracking-widest text-black border-b border-zinc-200 pb-2">
                   Thông tin & Đặc điểm sản phẩm
@@ -1094,30 +1202,26 @@ export default function App() {
                 <div className="grid grid-cols-3 py-1 border-b border-zinc-100">
                   <span className="text-zinc-500 font-medium">Chất liệu:</span>
                   <span className="col-span-2 font-bold">
-                    {activeProduct.material || "Cotton / Polyester cao cấp chính hãng"}
+                    {activeProduct.material || "Chất liệu cao cấp chính hãng"}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 py-1 border-b border-zinc-100">
                   <span className="text-zinc-500 font-medium">Form dáng:</span>
-                  <span className="col-span-2 font-bold">
-                    {activeProduct.fit || "Chuẩn form Streetwear"}
-                  </span>
+                  <span className="col-span-2 font-bold">{activeProduct.fit || "Chuẩn Streetwear"}</span>
                 </div>
                 <div className="grid grid-cols-3 py-1">
                   <span className="text-zinc-500 font-medium">Thanh toán:</span>
                   <span className="col-span-2 font-bold">
-                    Hỗ trợ COD nhận hàng kiểm tra hoặc VietQR MBBank tự động xác nhận
+                    Hỗ trợ COD kiểm tra hàng hoặc VietQR MBBank tự động xác nhận
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Sản phẩm gợi ý cùng kệ hàng */}
+          {/* Gợi ý cùng kệ hàng */}
           <div className="mt-16 pt-10 border-t border-zinc-200">
-            <h3 className="text-lg font-black uppercase tracking-wider mb-6">
-              Sản Phẩm Khác Bạn Có Thể Thích
-            </h3>
+            <h3 className="text-lg font-black uppercase tracking-wider mb-6">Sản Phẩm Khác Bạn Có Thể Thích</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
               {products
                 .filter((p) => p.id !== activeProduct.id)
@@ -1146,9 +1250,7 @@ export default function App() {
           </div>
         </main>
       ) : (
-        /* ================================================================= */
         /* MÀN HÌNH 2: TRANG CHỦ & KỆ HÀNG */
-        /* ================================================================= */
         <>
           <section className="relative bg-black text-white overflow-hidden border-b border-black">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 grid md:grid-cols-12 gap-8 items-center">
@@ -1192,7 +1294,7 @@ export default function App() {
                     onClick={() => setIsSizeGuideOpen(true)}
                     className="border border-white/40 text-white px-6 py-4 text-xs font-bold uppercase tracking-[0.15em] hover:bg-white hover:text-black transition"
                   >
-                    Đo Size Nón & Áo
+                    Đo Size Áo & Dép
                   </button>
                 </div>
               </div>
@@ -1200,15 +1302,15 @@ export default function App() {
               <div className="md:col-span-5 grid grid-cols-2 gap-3">
                 <div className="bg-zinc-900 aspect-[4/5] overflow-hidden border border-zinc-800">
                   <img
-                    src="https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80"
-                    alt="New Era NY"
+                    src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80"
+                    alt="Streetwear Stussy"
                     className="w-full h-full object-cover grayscale contrast-125 hover:scale-105 transition duration-500"
                   />
                 </div>
                 <div className="bg-zinc-900 aspect-[4/5] overflow-hidden border border-zinc-800 translate-y-6">
                   <img
-                    src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80"
-                    alt="Streetwear Tee"
+                    src="https://images.unsplash.com/photo-1603487742131-4160ec999306?auto=format&fit=crop&w=800&q=80"
+                    alt="Slide Slides"
                     className="w-full h-full object-cover grayscale contrast-125 hover:scale-105 transition duration-500"
                   />
                 </div>
@@ -1272,20 +1374,15 @@ export default function App() {
                   <div className="w-14 h-14 bg-black text-white flex items-center justify-center mb-4 group-hover:scale-110 transition">
                     <Plus className="w-7 h-7" />
                   </div>
-                  <span className="font-black uppercase tracking-widest text-sm">
-                    + Thêm Sản Phẩm Mới
-                  </span>
-                  <span className="text-xs text-zinc-500 mt-1">
-                    Tự động lưu thẳng lên Supabase Cloud
-                  </span>
+                  <span className="font-black uppercase tracking-widest text-sm">+ Thêm Sản Phẩm Mới</span>
+                  <span className="text-xs text-zinc-500 mt-1">Hỗ trợ nhập mã SKU để tự lấy size Sheet</span>
                 </button>
               )}
 
               {filteredProducts.map((product) => {
-                const chosenSize =
-                  cardSelections[product.id]?.size || product.sizes?.[0] || "FREE SIZE";
-                const chosenColor =
-                  cardSelections[product.id]?.color || product.colors?.[0] || "Tiêu chuẩn";
+                const chosenSize = cardSelections[product.id]?.size || product.sizes?.[0] || "FREE SIZE";
+                const chosenColor = cardSelections[product.id]?.color || product.colors?.[0] || "Tiêu chuẩn";
+                const isOutOfStock = product.sizes?.length === 1 && product.sizes[0] === "HẾT HÀNG";
 
                 return (
                   <div
@@ -1303,14 +1400,12 @@ export default function App() {
                         <button
                           onClick={() => handleDuplicateProduct(product)}
                           className="px-2 py-1 text-[11px] hover:bg-zinc-700"
-                          title="Nhân bản"
                         >
                           <Copy className="w-3 h-3" />
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(product.id)}
                           className="px-2 py-1 text-[11px] text-rose-400 hover:bg-zinc-700"
-                          title="Xóa"
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -1322,11 +1417,22 @@ export default function App() {
                         onClick={() => openProductDetail(product)}
                         className="relative aspect-[4/5] bg-zinc-100 overflow-hidden cursor-pointer"
                       >
-                        {product.tag && (
+                        {isOutOfStock ? (
+                          <span className="absolute top-3 left-3 z-10 bg-rose-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1">
+                            TẠM HẾT HÀNG
+                          </span>
+                        ) : product.tag ? (
                           <span className="absolute top-3 left-3 z-10 bg-black text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1">
                             {product.tag}
                           </span>
+                        ) : null}
+
+                        {product.sku && (
+                          <span className="absolute bottom-3 left-3 z-10 bg-black/75 text-white text-[9px] font-mono px-2 py-0.5">
+                            SKU: {product.sku}
+                          </span>
                         )}
+
                         <img
                           src={product.image}
                           alt={product.name}
@@ -1387,23 +1493,29 @@ export default function App() {
 
                       <div>
                         <div className="text-[10px] font-bold uppercase text-zinc-400 mb-1">
-                          Size đang chọn: <span className="text-black">{chosenSize}</span>
+                          Size còn hàng: <span className="text-black">{chosenSize}</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
-                          {(product.sizes || ["FREE SIZE"]).map((sz) => (
-                            <button
-                              key={sz}
-                              type="button"
-                              onClick={() => setCardSelection(product.id, "size", sz)}
-                              className={`text-[11px] font-bold px-2.5 py-1 border transition ${
-                                chosenSize === sz
-                                  ? "bg-black text-white border-black"
-                                  : "bg-white text-zinc-700 border-zinc-300 hover:border-black"
-                              }`}
-                            >
-                              {sz}
-                            </button>
-                          ))}
+                          {(product.sizes || ["FREE SIZE"]).map((sz) => {
+                            const isSzOut = sz === "HẾT HÀNG";
+                            return (
+                              <button
+                                key={sz}
+                                type="button"
+                                disabled={isSzOut}
+                                onClick={() => setCardSelection(product.id, "size", sz)}
+                                className={`text-[11px] font-bold px-2.5 py-1 border transition ${
+                                  isSzOut
+                                    ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed"
+                                    : chosenSize === sz
+                                    ? "bg-black text-white border-black"
+                                    : "bg-white text-zinc-700 border-zinc-300 hover:border-black"
+                                }`}
+                              >
+                                {sz}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
 
@@ -1417,10 +1529,11 @@ export default function App() {
                         </button>
                         <button
                           type="button"
+                          disabled={isOutOfStock}
                           onClick={() => addToCart(product, chosenSize, chosenColor, 1, true)}
-                          className="col-span-3 bg-black text-white py-2.5 text-[11px] font-black uppercase tracking-wider hover:bg-zinc-800 transition"
+                          className="col-span-3 bg-black text-white py-2.5 text-[11px] font-black uppercase tracking-wider hover:bg-zinc-800 transition disabled:opacity-40"
                         >
-                          + Thêm Giỏ Hàng
+                          {isOutOfStock ? "Tạm Hết" : "+ Thêm Giỏ"}
                         </button>
                       </div>
                     </div>
@@ -1432,7 +1545,7 @@ export default function App() {
         </>
       )}
 
-      {/* CAM KẾT CHÍNH HÃNG CHUD AUTHENTIC */}
+      {/* Cam kết ChuD Authentic */}
       <section className="border-t border-b border-zinc-200 bg-zinc-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="flex items-start gap-4">
@@ -1440,7 +1553,7 @@ export default function App() {
             <div>
               <h4 className="font-black uppercase text-sm tracking-wider">100% Authentic Legit</h4>
               <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
-                Cam kết chính hãng trọn đời cho mọi sản phẩm New Era, MLB, Essentials tại ChuD Authentic.
+                Cam kết chính hãng trọn đời cho mọi sản phẩm Stussy, MLB, Adidas, Essentials tại ChuD Authentic.
               </p>
             </div>
           </div>
@@ -1458,20 +1571,20 @@ export default function App() {
             <div>
               <h4 className="font-black uppercase text-sm tracking-wider">Hỗ Trợ Đổi Size</h4>
               <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
-                Hỗ trợ đổi size nhanh chóng trong vòng 7 ngày nếu khách hàng đội hoặc mặc chưa vừa form.
+                Hỗ trợ đổi size nhanh chóng trong vòng 7 ngày nếu khách hàng mang chưa vừa chân hoặc mặc chưa vừa form.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
+      {/* Footer */}
       <footer className="bg-black text-white py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-10">
           <div>
             <h3 className="text-2xl font-black tracking-tighter uppercase">{siteConfig.brandName}</h3>
             <p className="text-xs text-zinc-400 mt-3 leading-relaxed">
-              Chuyên phân phối nón New Era (NY Yankees, LA Dodgers), quần áo MLB & Fear of God Essentials chính hãng.
+              Chuyên phân phối thời trang streetwear chính hãng: Stussy, Adidas, MLB, Fear of God Essentials.
             </p>
           </div>
 
@@ -1514,9 +1627,8 @@ export default function App() {
           </div>
         </div>
       </footer>
-      {/* ================================================================= */}
-      {/* GIỎ HÀNG (SLIDE-OVER DRAWER) */}
-      {/* ================================================================= */}
+
+      {/* GIỎ HÀNG (DRAWER) */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 flex justify-end">
           <div className="bg-white w-full max-w-md h-full flex flex-col justify-between p-6">
@@ -1539,7 +1651,7 @@ export default function App() {
                     <div className="flex-1 text-xs">
                       <div className="font-bold line-clamp-1">{item.name}</div>
                       <div className="text-zinc-500 mt-0.5">
-                        Màu: <b>{item.color}</b> | Size: <b>{item.size}</b>
+                        {item.sku ? `Mã: ${item.sku} | ` : ""}Màu: <b>{item.color}</b> | Size: <b>{item.size}</b>
                       </div>
                       <div className="font-black mt-1">{formatVND(item.price)}</div>
                       <div className="flex items-center gap-2 mt-2">
@@ -1625,9 +1737,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ================================================================= */}
-      {/* MODAL THANH TOÁN & TỰ ĐỘNG XÁC NHẬN SEPAY REALTIME */}
-      {/* ================================================================= */}
+      {/* MODAL CHECKOUT & SEPAY REALTIME */}
       {isCheckoutOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white text-black max-w-3xl w-full border-2 border-black p-6 sm:p-8 my-8 max-h-[92vh] overflow-y-auto">
@@ -1650,7 +1760,7 @@ export default function App() {
                       ĐÃ NHẬN ĐƯỢC TIỀN — THANH TOÁN THÀNH CÔNG
                     </div>
                     <p className="text-emerald-100">
-                      Hệ thống MBBank & SePay đã xác nhận tự động đơn hàng <b>#{createdOrder.orderCode}</b> của bạn. ChuD Authentic đang chuẩn bị đóng gói sản phẩm.
+                      Hệ thống MBBank & SePay đã xác nhận tự động đơn hàng <b>#{createdOrder.orderCode}</b>. ChuD Authentic đang chuẩn bị đóng gói sản phẩm.
                     </p>
                   </div>
                 ) : (
@@ -1681,7 +1791,7 @@ export default function App() {
                       {isCheckingPayment && (
                         <div className="inline-flex items-center gap-2 bg-black text-white px-3 py-1.5 text-[11px] font-bold">
                           <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
-                          Đang chờ bạn quét QR (Tự động xác nhận sau 3 giây)...
+                          Đang chờ bạn quét QR (Tự động nhận diện sau 3 giây)...
                         </div>
                       )}
                     </div>
@@ -1712,31 +1822,9 @@ export default function App() {
                           CHUD {createdOrder.orderCode}
                         </span>
                       </div>
-                      <p className="text-zinc-500 leading-relaxed pt-1">
-                        Khi quét mã QR bằng App Ngân hàng, số tiền và nội dung <b>CHUD {createdOrder.orderCode}</b> đã được điền tự động. Ngay sau khi chuyển thành công, màn hình này sẽ tự động nhảy hoàn tất.
-                      </p>
                     </div>
                   </div>
                 )}
-
-                <div className="border border-zinc-200 p-4 space-y-2">
-                  <div className="font-black uppercase">Chi tiết đơn hàng #{createdOrder.orderCode}</div>
-                  <div>Địa chỉ nhận hàng: <b>{createdOrder.customerAddress}</b></div>
-                  <div className="pt-2 border-t border-zinc-100 space-y-1">
-                    {createdOrder.items.map((it, idx) => (
-                      <div key={idx} className="flex justify-between">
-                        <span>
-                          {it.name} ({it.color} / Size {it.size}) x{it.qty}
-                        </span>
-                        <span className="font-bold">{formatVND(it.price * it.qty)}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex justify-between text-sm font-black pt-2 border-t border-zinc-200">
-                    <span>TỔNG THANH TOÁN:</span>
-                    <span>{formatVND(createdOrder.totalAmount)}</span>
-                  </div>
-                </div>
 
                 <div className="flex flex-wrap gap-3">
                   <button
@@ -1768,23 +1856,19 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="font-bold uppercase block mb-1 flex items-center gap-1">
-                      <User className="w-3.5 h-3.5" /> Họ và tên người nhận *
-                    </label>
+                    <label className="font-bold uppercase block mb-1">Họ và tên người nhận *</label>
                     <input
                       type="text"
                       required
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="Nhập họ và tên của bạn..."
+                      placeholder="Nhập họ và tên..."
                       className="w-full border border-zinc-300 px-3.5 py-2.5 focus:outline-none focus:border-black"
                     />
                   </div>
 
                   <div>
-                    <label className="font-bold uppercase block mb-1 flex items-center gap-1">
-                      <Phone className="w-3.5 h-3.5" /> Số điện thoại liên hệ *
-                    </label>
+                    <label className="font-bold uppercase block mb-1">Số điện thoại liên hệ *</label>
                     <input
                       type="tel"
                       required
@@ -1796,9 +1880,7 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="font-bold uppercase block mb-1 flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5" /> Địa chỉ giao hàng chi tiết *
-                    </label>
+                    <label className="font-bold uppercase block mb-1">Địa chỉ giao hàng chi tiết *</label>
                     <input
                       type="text"
                       required
@@ -1810,14 +1892,11 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="font-bold uppercase block mb-1 flex items-center gap-1">
-                      <FileText className="w-3.5 h-3.5" /> Ghi chú đơn hàng (Tùy chọn)
-                    </label>
+                    <label className="font-bold uppercase block mb-1">Ghi chú đơn hàng (Tùy chọn)</label>
                     <textarea
                       rows={2}
                       value={customerNote}
                       onChange={(e) => setCustomerNote(e.target.value)}
-                      placeholder="Ghi chú giờ giao hàng hoặc lời nhắn cho ChuD..."
                       className="w-full border border-zinc-300 px-3.5 py-2 focus:outline-none focus:border-black"
                     />
                   </div>
@@ -1844,9 +1923,6 @@ export default function App() {
                         <div className="font-black uppercase flex items-center gap-1.5">
                           <Truck className="w-4 h-4" /> Thanh toán khi nhận hàng (COD)
                         </div>
-                        <p className="text-zinc-500 mt-0.5">
-                          Nhận hàng kiểm tra sản phẩm đúng tem mác chuẩn Authentic rồi mới thanh toán tiền mặt.
-                        </p>
                       </div>
                     </label>
 
@@ -1865,11 +1941,8 @@ export default function App() {
                       />
                       <div className="flex-1">
                         <div className="font-black uppercase flex items-center gap-1.5">
-                          <QrCode className="w-4 h-4" /> Chuyển khoản Ngân hàng tự động (VietQR MBBank)
+                          <QrCode className="w-4 h-4" /> Quét mã VietQR MBBank (Tự Động Xác Nhận)
                         </div>
-                        <p className="text-zinc-500 mt-0.5">
-                          Tự động tạo mã QR theo đơn hàng và tự động xác nhận ngay khi bạn chuyển khoản thành công.
-                        </p>
                       </div>
                     </label>
 
@@ -1907,7 +1980,7 @@ export default function App() {
                           <div className="flex-1">
                             <div className="font-bold line-clamp-1">{item.name}</div>
                             <div className="text-[11px] text-zinc-500">
-                              {item.color} | Size {item.size} x{item.qty}
+                              {item.sku ? `Mã: ${item.sku} | ` : ""}{item.color} | Size {item.size} x{item.qty}
                             </div>
                             <div className="font-black mt-0.5">{formatVND(item.price * item.qty)}</div>
                           </div>
@@ -1944,11 +2017,7 @@ export default function App() {
                     disabled={isSubmittingOrder || cart.length === 0}
                     className="w-full bg-black text-white py-4 font-black uppercase tracking-[0.18em] hover:bg-zinc-800 transition disabled:opacity-50"
                   >
-                    {isSubmittingOrder
-                      ? "Đang Tạo Đơn & Mã QR..."
-                      : paymentMethod === "VIETQR"
-                      ? "Hoàn Tất & Lấy Mã VietQR"
-                      : "Hoàn Tất Đặt Hàng"}
+                    {isSubmittingOrder ? "Đang Khởi Tạo..." : "Hoàn Tất Đặt Hàng"}
                   </button>
                 </div>
               </form>
@@ -1957,7 +2026,63 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL CẤU HÌNH MBBANK & SEPAY DÀNH CHO ADMIN */}
+      {/* MODAL CẤU HÌNH GOOGLE SHEETS */}
+      {isSheetModalOpen && isAdmin && (
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white text-black max-w-lg w-full p-6 border-2 border-black space-y-4 text-xs my-8">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <h3 className="font-black uppercase tracking-wider text-sm flex items-center gap-2">
+                <FileSpreadsheet className="w-4 h-4" /> Cấu Hình Google Sheets Kho Hàng
+              </h3>
+              <button onClick={() => setIsSheetModalOpen(false)}>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="font-bold block mb-1">Đường link Google Sheets kho</label>
+                <input
+                  type="text"
+                  value={siteConfig.sheetUrl || ""}
+                  onChange={(e) => setSiteConfig({ ...siteConfig, sheetUrl: e.target.value })}
+                  placeholder="https://docs.google.com/spreadsheets/d/..."
+                  className="w-full border border-zinc-300 px-3 py-2 font-mono text-[11px]"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">
+                  Mã GID các trang cần quét (cách nhau dấu phẩy)
+                </label>
+                <input
+                  type="text"
+                  value={siteConfig.sheetGids || ""}
+                  onChange={(e) => setSiteConfig({ ...siteConfig, sheetGids: e.target.value })}
+                  placeholder="1599511117, 118702566, 1380208994..."
+                  className="w-full border border-zinc-300 px-3 py-2 font-mono text-[11px]"
+                />
+                <p className="text-[10px] text-zinc-500 mt-1">
+                  Mã GID nằm ở cuối link URL mỗi trang (sau cụm #gid=).
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                saveToSupabase(siteConfig, products);
+                setIsSheetModalOpen(false);
+                syncInventoryFromSheet(products, siteConfig, false);
+              }}
+              className="w-full bg-black text-white py-3 font-black uppercase tracking-wider"
+            >
+              Lưu & Đồng Bộ Ngay
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CẤU HÌNH MBBANK & SEPAY */}
       {isBankModalOpen && isAdmin && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white text-black max-w-lg w-full p-6 border-2 border-black space-y-4 text-xs my-8">
@@ -1972,18 +2097,17 @@ export default function App() {
 
             <div className="space-y-3">
               <div>
-                <label className="font-bold block mb-1">SePay API Token (Tự động xác nhận thanh toán)</label>
+                <label className="font-bold block mb-1">SePay API Token</label>
                 <input
                   type="text"
                   value={siteConfig.sepayApiToken || ""}
                   onChange={(e) => setSiteConfig({ ...siteConfig, sepayApiToken: e.target.value })}
-                  placeholder="Dán mã API Token SePay..."
                   className="w-full border border-zinc-300 px-3 py-2 font-mono bg-white"
                 />
               </div>
 
               <div>
-                <label className="font-bold block mb-1">Ngân hàng nhận tiền</label>
+                <label className="font-bold block mb-1">Ngân hàng</label>
                 <select
                   value={siteConfig.bankId || "MB"}
                   onChange={(e) => setSiteConfig({ ...siteConfig, bankId: e.target.value })}
@@ -2027,19 +2151,19 @@ export default function App() {
               }}
               className="w-full bg-black text-white py-3 font-black uppercase tracking-wider"
             >
-              Lưu Cấu Hình Lên Cloud
+              Lưu Lên Cloud
             </button>
           </div>
         </div>
       )}
 
-      {/* MODAL QUẢN LÝ ĐƠN HÀNG (ADMIN) */}
+      {/* MODAL QUẢN LÝ ĐƠN HÀNG */}
       {isOrdersModalOpen && isAdmin && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white text-black max-w-4xl w-full p-6 border-2 border-black space-y-4 my-8 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
               <h3 className="font-black uppercase tracking-wider text-sm flex items-center gap-2">
-                <Package className="w-4 h-4" /> Danh Sách Đơn Hàng ({(siteConfig.orders || []).length})
+                <Package className="w-4 h-4" /> Quản Lý Đơn Hàng ({(siteConfig.orders || []).length})
               </h3>
               <button onClick={() => setIsOrdersModalOpen(false)}>
                 <X className="w-5 h-5" />
@@ -2088,13 +2212,12 @@ export default function App() {
                         <div>Khách hàng: <b>{ord.customerName}</b></div>
                         <div>SĐT: <b className="font-mono">{ord.customerPhone}</b></div>
                         <div>Địa chỉ: <b>{ord.customerAddress}</b></div>
-                        {ord.customerNote && <div>Ghi chú: <i>{ord.customerNote}</i></div>}
                       </div>
                       <div className="space-y-1">
                         {(ord.items || []).map((it, i) => (
                           <div key={i} className="flex justify-between">
                             <span>
-                              • {it.name} ({it.color} / {it.size}) x{it.qty}
+                              • {it.name} {it.sku ? `(Mã: ${it.sku}) ` : ""}({it.color} / {it.size}) x{it.qty}
                             </span>
                             <span className="font-bold">{formatVND(it.price * it.qty)}</span>
                           </div>
@@ -2147,7 +2270,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL THÊM / SỬA SẢN PHẨM ĐẦY ĐỦ */}
+      {/* MODAL THÊM / SỬA SẢN PHẨM (CÓ Ô NHẬP MÃ SKU GOOGLE SHEET) */}
       {isProductModalOpen && editingProduct && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
           <form
@@ -2155,15 +2278,26 @@ export default function App() {
             className="bg-white text-black max-w-xl w-full p-6 border-2 border-black space-y-4 my-8 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
-              <h3 className="font-black uppercase tracking-wider text-sm">
-                Chỉnh Sửa Chi Tiết Sản Phẩm (Đồng Bộ Supabase)
-              </h3>
+              <h3 className="font-black uppercase tracking-wider text-sm">Chỉnh Sửa Chi Tiết Sản Phẩm</h3>
               <button type="button" onClick={() => setIsProductModalOpen(false)}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
+              <div className="bg-amber-50 border border-amber-300 p-2.5">
+                <label className="font-black uppercase block mb-1 text-black">
+                  Mã số sản phẩm trên Sheet (SKU) — Tự động lấy size
+                </label>
+                <input
+                  type="text"
+                  value={editingProduct.sku || ""}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, sku: e.target.value })}
+                  placeholder="Ví dụ: 1904894, 1904876... (Để trống nếu nhập size thủ công)"
+                  className="w-full border border-black bg-white px-3 py-2 font-mono font-bold"
+                />
+              </div>
+
               <div>
                 <label className="font-bold uppercase block mb-1">Tên sản phẩm *</label>
                 <input
@@ -2177,16 +2311,17 @@ export default function App() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold uppercase block mb-1">Thương hiệu</label>
+                  <label className="font-bold uppercase block mb-1">Thương hiệu (Tự do nhập)</label>
                   <input
                     type="text"
                     value={editingProduct.brand}
                     onChange={(e) => setEditingProduct({ ...editingProduct, brand: e.target.value })}
-                    className="w-full border border-zinc-300 px-3 py-2"
+                    placeholder="VD: Stussy, Adidas, Nike..."
+                    className="w-full border border-zinc-300 px-3 py-2 font-bold"
                   />
                 </div>
                 <div>
-                  <label className="font-bold uppercase block mb-1">Danh mục</label>
+                  <label className="font-bold uppercase block mb-1">Danh mục (Áo / Dép / Quần...)</label>
                   <input
                     type="text"
                     value={editingProduct.category}
@@ -2225,13 +2360,14 @@ export default function App() {
                   type="text"
                   value={colorsInput}
                   onChange={(e) => setColorsInput(e.target.value)}
-                  placeholder="Ví dụ: Đen, Trắng, Kem..."
                   className="w-full border border-zinc-300 px-3 py-2"
                 />
               </div>
 
               <div>
-                <label className="font-bold uppercase block mb-1">Chọn các Size hiện có</label>
+                <label className="font-bold uppercase block mb-1">
+                  Chọn các Size thủ công (Nếu không dùng mã SKU Sheet)
+                </label>
                 <div className="flex flex-wrap gap-1.5">
                   {ALL_SIZE_OPTIONS.map((sz) => {
                     const active = editingProduct.sizes?.includes(sz);
@@ -2257,12 +2393,11 @@ export default function App() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold uppercase block mb-1">Chất liệu (Trang chi tiết)</label>
+                  <label className="font-bold uppercase block mb-1">Chất liệu</label>
                   <input
                     type="text"
                     value={editingProduct.material || ""}
                     onChange={(e) => setEditingProduct({ ...editingProduct, material: e.target.value })}
-                    placeholder="VD: 100% Cotton 250gsm"
                     className="w-full border border-zinc-300 px-3 py-2"
                   />
                 </div>
@@ -2272,7 +2407,6 @@ export default function App() {
                     type="text"
                     value={editingProduct.fit || ""}
                     onChange={(e) => setEditingProduct({ ...editingProduct, fit: e.target.value })}
-                    placeholder="VD: Oversized Fit"
                     className="w-full border border-zinc-300 px-3 py-2"
                   />
                 </div>
@@ -2291,19 +2425,18 @@ export default function App() {
 
               <div>
                 <label className="font-bold uppercase block mb-1">
-                  Các link ảnh phụ ở trang chi tiết (Mỗi dòng 1 link ảnh)
+                  Link ảnh phụ ở trang chi tiết (Mỗi dòng 1 link)
                 </label>
                 <textarea
                   rows={2}
                   value={galleryInput}
                   onChange={(e) => setGalleryInput(e.target.value)}
-                  placeholder="Dán thêm các link ảnh góc chụp khác (mỗi dòng 1 link)..."
                   className="w-full border border-zinc-300 px-3 py-2"
                 />
               </div>
 
               <div>
-                <label className="font-bold uppercase block mb-1">Mô tả chi tiết sản phẩm</label>
+                <label className="font-bold uppercase block mb-1">Mô tả chi tiết</label>
                 <textarea
                   rows={3}
                   value={editingProduct.description}
@@ -2345,7 +2478,7 @@ export default function App() {
                   setSearchQuery(e.target.value);
                   setActiveProduct(null);
                 }}
-                placeholder="Gõ tên sản phẩm: New Era, NY Yankees, MLB, Hoodie..."
+                placeholder="Gõ tên sản phẩm, mã SP (SKU), thương hiệu, Size..."
                 autoFocus
                 className="w-full text-sm focus:outline-none"
               />
@@ -2357,7 +2490,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL BẢNG SIZE */}
+      {/* MODAL BẢNG SIZE DÉP & QUẦN ÁO */}
       {isSizeGuideOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white max-w-xl w-full p-6 border-2 border-black space-y-5">
@@ -2371,8 +2504,34 @@ export default function App() {
             </div>
 
             <div className="space-y-4 text-xs">
+              {/* Đo Size Dép */}
               <div className="bg-zinc-100 p-4 space-y-3">
-                <div className="font-black uppercase">1. Gợi ý Size Quần Áo (MLB / Essentials)</div>
+                <div className="font-black uppercase">1. Đo Chiều Dài Bàn Chân Cho Size Dép (Slide / Sandal)</div>
+                <div>
+                  <label className="block mb-1">
+                    Chiều dài bàn chân: <b>{footLength} cm</b>
+                  </label>
+                  <input
+                    type="range"
+                    min="22"
+                    max="29"
+                    step="0.1"
+                    value={footLength}
+                    onChange={(e) => setFootLength(Number(e.target.value))}
+                    className="w-full accent-black"
+                  />
+                </div>
+                <div className="bg-black text-white p-2.5 text-center font-bold">
+                  Size Dép phù hợp với chân bạn: <span className="text-amber-300 text-sm">{recommendedSlideSize}</span>
+                </div>
+                <p className="text-[10px] text-zinc-500">
+                  Mẹo: Nếu mu bàn chân dày hoặc bè ngang, bạn nên chọn tăng thêm 1 size so với kích thước trên.
+                </p>
+              </div>
+
+              {/* Đo Size Quần Áo */}
+              <div className="bg-zinc-100 p-4 space-y-3">
+                <div className="font-black uppercase">2. Gợi ý Size Quần Áo (Stussy / MLB / Essentials)</div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block mb-1">Chiều cao: <b>{userHeight} cm</b></label>
@@ -2399,25 +2558,6 @@ export default function App() {
                 </div>
                 <div className="bg-black text-white p-2.5 text-center font-bold">
                   Size Áo / Quần phù hợp với bạn: <span className="text-amber-300 text-sm">{recommendedClothingSize}</span>
-                </div>
-              </div>
-
-              <div className="bg-zinc-100 p-4 space-y-3">
-                <div className="font-black uppercase">2. Đo Vòng Đầu Nón New Era 59FIFTY Fitted</div>
-                <div>
-                  <label className="block mb-1">Chu vi vòng đầu: <b>{headCircumference} cm</b></label>
-                  <input
-                    type="range"
-                    min="54.9"
-                    max="60.6"
-                    step="0.1"
-                    value={headCircumference}
-                    onChange={(e) => setHeadCircumference(Number(e.target.value))}
-                    className="w-full accent-black"
-                  />
-                </div>
-                <div className="bg-black text-white p-2.5 text-center font-bold">
-                  Size Nón New Era chuẩn: <span className="text-amber-300 text-sm">{recommendedNewEraSize}</span>
                 </div>
               </div>
             </div>

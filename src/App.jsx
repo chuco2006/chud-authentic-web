@@ -510,17 +510,15 @@ export default function App() {
       .split(",")
       .map((c) => c.trim())
       .filter(Boolean);
-    const parsedGallery = galleryInput
-      .split("\n")
-      .map((u) => u.trim())
-      .filter(Boolean);
-
-    const finalProd = {
-      ...editingProduct,
-      sku: (editingProduct.sku || "").trim().toUpperCase(),
-      colors: parsedColors.length > 0 ? parsedColors : ["Tiêu chuẩn"],
-      gallery: parsedGallery.length > 0 ? parsedGallery : [editingProduct.image]
-    };
+   const finalProd = {
+    ...editingProduct,
+    sku: (editingProduct.sku || "").trim().toUpperCase(),
+    colors: parsedColors.length > 0 ? parsedColors : ["Tiêu chuẩn"],
+    gallery:
+      editingProduct.gallery && editingProduct.gallery.length > 0
+        ? editingProduct.gallery
+        : [editingProduct.image]
+  };
 
     const exists = products.some((p) => p.id === finalProd.id);
     const updatedProducts = exists
@@ -564,6 +562,29 @@ export default function App() {
       setEditingProduct((prev) => ({ ...prev, image: reader.result }));
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleGalleryUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditingProduct((prev) => ({
+          ...prev,
+          gallery: [...(prev.gallery || []), reader.result]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveGalleryImage = (indexToRemove) => {
+    setEditingProduct((prev) => ({
+      ...prev,
+      gallery: (prev.gallery || []).filter((_, idx) => idx !== indexToRemove)
+    }));
   };
 
   // 6. BỘ LỌC TỰ ĐỘNG THEO THƯƠNG HIỆU & DANH MỤC
@@ -2424,16 +2445,35 @@ export default function App() {
               </div>
 
               <div>
-                <label className="font-bold uppercase block mb-1">
-                  Link ảnh phụ ở trang chi tiết (Mỗi dòng 1 link)
-                </label>
-                <textarea
-                  rows={2}
-                  value={galleryInput}
-                  onChange={(e) => setGalleryInput(e.target.value)}
-                  className="w-full border border-zinc-300 px-3 py-2"
-                />
-              </div>
+  <label className="font-bold uppercase block mb-1">
+    Ảnh phụ ở trang chi tiết (Chọn nhiều ảnh từ máy)
+  </label>
+  <input
+    type="file"
+    multiple
+    accept="image/*"
+    onChange={handleGalleryUpload}
+    className="text-xs mb-2"
+  />
+
+  {/* Khung hiển thị các ảnh phụ đã chọn kèm nút xóa */}
+  {editingProduct.gallery && editingProduct.gallery.length > 0 && (
+    <div className="flex flex-wrap gap-2 pt-1">
+      {editingProduct.gallery.map((imgUrl, idx) => (
+        <div key={idx} className="relative w-16 h-20 border border-zinc-300 bg-zinc-100">
+          <img src={imgUrl} alt="" className="w-full h-full object-cover" />
+          <button
+            type="button"
+            onClick={() => handleRemoveGalleryImage(idx)}
+            className="absolute -top-1.5 -right-1.5 bg-black text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] hover:bg-rose-600"
+          >
+            ×
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
               <div>
                 <label className="font-bold uppercase block mb-1">Mô tả chi tiết</label>

@@ -946,16 +946,14 @@ export default function App() {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
-            <div
-              onClick={() => {
-                if (isAdmin) handleEditText("brandName", "Tên thương hiệu");
-                else setActiveProduct(null);
-              }}
-              className={`text-2xl sm:text-3xl font-black tracking-tighter uppercase cursor-pointer ${
-                isAdmin ? "border border-dashed border-black px-2" : ""
-              }`}
+           <div
+              onClick={() => setActiveProduct(null)}
+              className="cursor-pointer flex items-center gap-2.5"
             >
-              {siteConfig.brandName}
+              <img src="/ChuDLogoXoaPhong.png" alt="CHUD AUTHENTIC" className="h-10 w-auto object-contain" />
+              <span className="text-xl sm:text-2xl font-black tracking-tighter uppercase">
+                {siteConfig.brandName}
+              </span>
             </div>
 
             <nav className="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-widest">

@@ -1968,17 +1968,18 @@ export default function App() {
                     1. Thông Tin Người Nhận Hàng
                   </div>
 
-                  <div>
-                    <label className="font-bold uppercase block mb-1">Họ và tên người nhận *</label>
-                    <input
-                      type="text"
-                      required
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="Nhập họ và tên..."
-                      className="w-full border border-zinc-300 px-3.5 py-2.5 focus:outline-none focus:border-black"
-                    />
-                  </div>
+               <div>
+                <label className="font-bold uppercase block mb-1">
+                  Nhãn nổi bật góc ảnh (HOT DROP, BEST SELLER, SALE... hoặc để trống)
+                </label>
+                <input
+                  type="text"
+                  value={editingProduct.tag || ""}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, tag: e.target.value.toUpperCase() })}
+                  placeholder="Ví dụ: HOT DROP, BEST SELLER, NEW ARRIVAL..."
+                  className="w-full border border-zinc-300 px-3 py-2 font-bold uppercase"
+                />
+              </div>
 
                   <div>
                     <label className="font-bold uppercase block mb-1">Số điện thoại liên hệ *</label>

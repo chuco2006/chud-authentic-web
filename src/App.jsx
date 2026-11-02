@@ -855,11 +855,6 @@ export default function App() {
       setCreatedOrder(newOrder);
       setCart([]);
 
-      if (paymentMethod === "ZALO") {
-        const msg = buildZaloMessage(newOrder);
-        navigator.clipboard?.writeText(msg);
-        window.open(`https://zalo.me/${siteConfig.hotline.replace(/[^0-9]/g, "")}`, "_blank");
-      }
     } finally {
       setIsSubmittingOrder(false);
     }
@@ -2059,25 +2054,7 @@ export default function App() {
                       </div>
                     </label>
 
-                    <label
-                      onClick={() => setPaymentMethod("ZALO")}
-                      className={`flex items-start gap-3 p-3.5 border-2 cursor-pointer transition ${
-                        paymentMethod === "ZALO" ? "border-black bg-zinc-50" : "border-zinc-200"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        checked={paymentMethod === "ZALO"}
-                        onChange={() => setPaymentMethod("ZALO")}
-                        className="mt-1 accent-black"
-                      />
-                      <div className="flex-1">
-                        <div className="font-black uppercase flex items-center gap-1.5">
-                          <Phone className="w-4 h-4" /> Lưu đơn & Chuyển sang Chat Zalo
-                        </div>
-                      </div>
-                    </label>
+                   
                   </div>
                 </div>
 

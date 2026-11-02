@@ -33,9 +33,32 @@ const DEFAULT_SITE_CONFIG = {
   bankAccountNo: "20069696969696",
   bankAccountName: "HO KINH DOANH CHUD",
   sepayApiToken: "2XUGLIKPNDP8EXLMHSWSEI11LYCYG5QQQ9UKGW9FOVYL7MOPEWCNMJ46HSNS53PZ",
-  // Cấu hình đồng bộ tự động Google Sheets (5 trang GID của bạn)
+  // Cấu hình đồng bộ tự động Google Sheets
   sheetUrl: "https://docs.google.com/spreadsheets/d/1ckYtsDySTIMYgWy-QEJ-bMyN-QcEkPIfN49Iu-9_Ptw/edit",
   sheetGids: "1599511117, 118702566, 1380208994, 1458127387, 447218553",
+  // Danh sách banner trượt trang chủ
+  banners: [
+    {
+      id: 1,
+      image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1600&q=80",
+      tag: "COLLECTION 2026",
+      title: "STREETWEAR AUTHENTIC CHUẨN MỰC",
+      subtitle: "Tuyển tập Stussy, MLB, Adidas, Essentials chính hãng.",
+      ctaText: "KHÁM PHÁ KỆ HÀNG",
+      ctaLink: "#catalog",
+      showCta: true
+    },
+    {
+      id: 2,
+      image: "https://images.unsplash.com/photo-1603487742131-4160ec999306?auto=format&fit=crop&w=1600&q=80",
+      tag: "HOT DROP",
+      title: "BỘ SƯU TẬP DÉP SLIDE CHÍNH HÃNG",
+      subtitle: "Đệm êm kháng trượt, form dáng tối giản năng động.",
+      ctaText: "KHÁM PHÁ SẢN PHẨM",
+      ctaLink: "#catalog",
+      showCta: true
+    }
+  ],
   orders: []
 };
 
@@ -230,6 +253,43 @@ export default function App() {
   const [isBankModalOpen, setIsBankModalOpen] = useState(false);
   const [isSheetModalOpen, setIsSheetModalOpen] = useState(false);
   const [isSyncingSheet, setIsSyncingSheet] = useState(false);
+
+  // Quản lý Slider Banner
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
+
+  // Danh sách banner hiện hành
+  const bannerList = siteConfig.banners && siteConfig.banners.length > 0
+    ? siteConfig.banners
+    : [
+        {
+          id: 1,
+          image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1600&q=80",
+          tag: siteConfig.heroTag || "COLLECTION 2026",
+          title: siteConfig.heroTitle || "STREETWEAR AUTHENTIC",
+          subtitle: siteConfig.heroSubtitle || "",
+          ctaText: siteConfig.heroCta || "KHÁM PHÁ KỆ HÀNG",
+          ctaLink: "#catalog",
+          showCta: true
+        }
+      ];
+
+  // Tự động chuyển slide sau mỗi 5 giây
+  useEffect(() => {
+    if (bannerList.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % bannerList.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [bannerList.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % bannerList.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + bannerList.length) % bannerList.length);
+  };
 
   // 1. TẢI DỮ LIỆU TỪ SUPABASE & TỰ ĐỘNG ĐỒNG BỘ SIZE TỪ GOOGLE SHEETS
   useEffect(() => {
@@ -948,12 +1008,13 @@ export default function App() {
           <div className="flex items-center gap-6">
            <div
               onClick={() => setActiveProduct(null)}
-              className="cursor-pointer flex items-center gap-2.5"
+              className="cursor-pointer flex items-center py-2"
             >
-              <img src="/ChuDLogoXoaPhong.png" alt="CHUD AUTHENTIC" className="h-10 w-auto object-contain" />
-              <span className="text-xl sm:text-2xl font-black tracking-tighter uppercase">
-                {siteConfig.brandName}
-              </span>
+              <img 
+                src="/ChuDLogoXoaPhong.png" 
+                alt="" 
+                className="h-10 sm:h-12 w-auto object-contain" 
+              />
             </div>
 
             <nav className="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-widest">
@@ -1271,70 +1332,103 @@ export default function App() {
       ) : (
         /* MÀN HÌNH 2: TRANG CHỦ & KỆ HÀNG */
         <>
-          <section className="relative bg-black text-white overflow-hidden border-b border-black">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 grid md:grid-cols-12 gap-8 items-center">
-              <div className="md:col-span-7 space-y-6">
+        {/* BANNER SLIDER CAROUSEL */}
+          <section className="relative bg-black text-white overflow-hidden border-b border-black group">
+            <div className="relative w-full min-h-[460px] sm:min-h-[560px] flex items-center">
+              {bannerList.map((banner, index) => (
                 <div
-                  onClick={() => handleEditText("heroTag", "Nhãn bộ sưu tập")}
-                  className={`inline-block border border-white/30 px-3 py-1 text-[11px] font-mono uppercase tracking-[0.25em] text-white ${
-                    isAdmin ? "cursor-pointer hover:border-amber-400" : ""
+                  key={banner.id || index}
+                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                    index === currentSlide ? "opacity-100 z-10 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"
                   }`}
                 >
-                  {siteConfig.heroTag}
+                  {/* Ảnh nền Banner */}
+                  <img
+                    src={banner.image}
+                    alt={banner.title || "Banner"}
+                    className="w-full h-full object-cover object-center brightness-[0.45]"
+                  />
+
+                  {/* Lớp phủ nội dung chữ và nút bấm */}
+                  <div className="absolute inset-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-start space-y-4">
+                    {banner.tag && (
+                      <span className="border border-white/40 px-3 py-1 text-[11px] font-mono uppercase tracking-[0.25em] bg-black/40 backdrop-blur-sm">
+                        {banner.tag}
+                      </span>
+                    )}
+
+                    {banner.title && (
+                      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight max-w-2xl leading-[1.1]">
+                        {banner.title}
+                      </h1>
+                    )}
+
+                    {banner.subtitle && (
+                      <p className="text-zinc-300 text-xs sm:text-sm max-w-lg leading-relaxed">
+                        {banner.subtitle}
+                      </p>
+                    )}
+
+                    {/* Nút bấm Khám phá */}
+                    {banner.showCta && (
+                      <div className="pt-3">
+                        <a
+                          href={banner.ctaLink || "#catalog"}
+                          className="bg-white text-black px-7 py-3.5 text-xs font-black uppercase tracking-[0.2em] hover:bg-zinc-200 transition inline-flex items-center gap-2 shadow-xl"
+                        >
+                          {banner.ctaText || "KHÁM PHÁ KỆ HÀNG"} <ArrowRight className="w-4 h-4" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              ))}
 
-                <h1
-                  onClick={() => handleEditText("heroTitle", "Tiêu đề lớn Hero")}
-                  style={{ color: "#ffffff" }}
-                  className={`text-4xl sm:text-6xl font-black tracking-tight uppercase leading-[1.05] text-white ${
-                    isAdmin ? "cursor-pointer border border-dashed border-zinc-500 p-2" : ""
-                  }`}
-                >
-                  {siteConfig.heroTitle}
-                </h1>
-
-                <p
-                  onClick={() => handleEditText("heroSubtitle", "Mô tả phụ Hero")}
-                  className={`text-zinc-400 text-sm sm:text-base max-w-xl leading-relaxed ${
-                    isAdmin ? "cursor-pointer border border-dashed border-zinc-600 p-2" : ""
-                  }`}
-                >
-                  {siteConfig.heroSubtitle}
-                </p>
-
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <a
-                    href="#catalog"
-                    className="bg-white text-black px-7 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-zinc-200 transition inline-flex items-center gap-2"
-                  >
-                    {siteConfig.heroCta} <ArrowRight className="w-4 h-4" />
-                  </a>
+              {/* Mũi tên chuyển ảnh Trái / Phải */}
+              {bannerList.length > 1 && (
+                <>
                   <button
-                    onClick={() => setIsSizeGuideOpen(true)}
-                    className="border border-white/40 text-white px-6 py-4 text-xs font-bold uppercase tracking-[0.15em] hover:bg-white hover:text-black transition"
+                    onClick={prevSlide}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black text-white p-3 border border-white/20 transition opacity-80 group-hover:opacity-100"
                   >
-                    Đo Size Áo & Dép
+                    <ArrowLeft className="w-5 h-5" />
                   </button>
-                </div>
-              </div>
+                  <button
+                    onClick={nextSlide}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black text-white p-3 border border-white/20 transition opacity-80 group-hover:opacity-100"
+                  >
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
 
-              <div className="md:col-span-5 grid grid-cols-2 gap-3">
-                <div className="bg-zinc-900 aspect-[4/5] overflow-hidden border border-zinc-800">
-                  <img
-                    src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80"
-                    alt="Streetwear Stussy"
-                    className="w-full h-full object-cover grayscale contrast-125 hover:scale-105 transition duration-500"
-                  />
+              {/* Dấu chấm chuyển slide ở đáy */}
+              {bannerList.length > 1 && (
+                <div className="absolute bottom-5 inset-x-0 z-20 flex justify-center gap-2">
+                  {bannerList.map((_, dotIdx) => (
+                    <button
+                      key={dotIdx}
+                      onClick={() => setCurrentSlide(dotIdx)}
+                      className={`h-2 transition-all ${
+                        dotIdx === currentSlide ? "w-8 bg-white" : "w-2 bg-white/40"
+                      }`}
+                    />
+                  ))}
                 </div>
-                <div className="bg-zinc-900 aspect-[4/5] overflow-hidden border border-zinc-800 translate-y-6">
-                  <img
-                    src="https://images.unsplash.com/photo-1603487742131-4160ec999306?auto=format&fit=crop&w=800&q=80"
-                    alt="Slide Slides"
-                    className="w-full h-full object-cover grayscale contrast-125 hover:scale-105 transition duration-500"
-                  />
-                </div>
-              </div>
+              )}
             </div>
+
+            {/* Nút mở cài đặt Banner cho Admin */}
+            {isAdmin && (
+              <div className="absolute top-4 right-4 z-30">
+                <button
+                  onClick={() => setIsBannerModalOpen(true)}
+                  className="bg-black/90 text-amber-300 border border-amber-400 px-3.5 py-2 text-xs font-bold uppercase tracking-wider hover:bg-black flex items-center gap-1.5"
+                >
+                  <Edit3 className="w-3.5 h-3.5" /> Quản Lý Danh Sách Banner ({bannerList.length})
+                </button>
+              </div>
+            )}
           </section>
 
           <section id="catalog" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -2528,6 +2622,174 @@ export default function App() {
         </div>
       )}
 
+      {/* MODAL QUẢN LÝ BANNER SLIDER DÀNH CHO ADMIN */}
+      {isBannerModalOpen && isAdmin && (
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white text-black max-w-2xl w-full p-6 border-2 border-black space-y-4 my-8 max-h-[90vh] overflow-y-auto text-xs">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <h3 className="font-black uppercase tracking-wider text-sm">
+                Cài Đặt Banner Slider Trang Chủ
+              </h3>
+              <button onClick={() => setIsBannerModalOpen(false)}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {bannerList.map((b, idx) => (
+                <div key={b.id || idx} className="border border-zinc-300 p-3.5 space-y-2 bg-zinc-50 relative">
+                  <div className="flex items-center justify-between font-black uppercase text-[11px] border-b pb-1.5">
+                    <span>Banner #{idx + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (bannerList.length <= 1) {
+                          alert("Cần giữ ít nhất 1 banner.");
+                          return;
+                        }
+                        const updated = bannerList.filter((_, i) => i !== idx);
+                        saveToSupabase({ ...siteConfig, banners: updated }, products);
+                      }}
+                      className="text-rose-600 font-bold hover:underline"
+                    >
+                      Xóa Banner Này
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="font-bold block mb-1">Link ảnh Banner</label>
+                      <input
+                        type="text"
+                        value={b.image || ""}
+                        onChange={(e) => {
+                          const updated = [...bannerList];
+                          updated[idx] = { ...updated[idx], image: e.target.value };
+                          saveToSupabase({ ...siteConfig, banners: updated }, products);
+                        }}
+                        className="w-full border border-zinc-300 px-2 py-1.5 text-[11px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold block mb-1">Tải ảnh từ máy lên</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const updated = [...bannerList];
+                            updated[idx] = { ...updated[idx], image: reader.result };
+                            saveToSupabase({ ...siteConfig, banners: updated }, products);
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        className="text-[11px]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="font-bold block mb-1">Tiêu đề lớn</label>
+                      <input
+                        type="text"
+                        value={b.title || ""}
+                        onChange={(e) => {
+                          const updated = [...bannerList];
+                          updated[idx] = { ...updated[idx], title: e.target.value };
+                          saveToSupabase({ ...siteConfig, banners: updated }, products);
+                        }}
+                        className="w-full border border-zinc-300 px-2 py-1.5"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold block mb-1">Mô tả phụ</label>
+                      <input
+                        type="text"
+                        value={b.subtitle || ""}
+                        onChange={(e) => {
+                          const updated = [...bannerList];
+                          updated[idx] = { ...updated[idx], subtitle: e.target.value };
+                          saveToSupabase({ ...siteConfig, banners: updated }, products);
+                        }}
+                        className="w-full border border-zinc-300 px-2 py-1.5"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Bật/Tắt nút Khám phá */}
+                  <div className="pt-1 flex flex-wrap items-center gap-4 border-t border-zinc-200">
+                    <label className="flex items-center gap-1.5 font-bold cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={b.showCta ?? true}
+                        onChange={(e) => {
+                          const updated = [...bannerList];
+                          updated[idx] = { ...updated[idx], showCta: e.target.checked };
+                          saveToSupabase({ ...siteConfig, banners: updated }, products);
+                        }}
+                        className="accent-black"
+                      />
+                      Bật nút "Khám phá" trên slide này
+                    </label>
+
+                    {(b.showCta ?? true) && (
+                      <div className="flex items-center gap-2 flex-1">
+                        <input
+                          type="text"
+                          value={b.ctaText || "KHÁM PHÁ KỆ HÀNG"}
+                          placeholder="Chữ trên nút..."
+                          onChange={(e) => {
+                            const updated = [...bannerList];
+                            updated[idx] = { ...updated[idx], ctaText: e.target.value };
+                            saveToSupabase({ ...siteConfig, banners: updated }, products);
+                          }}
+                          className="border border-zinc-300 px-2 py-1 flex-1 font-bold"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-between items-center pt-3 border-t">
+              <button
+                type="button"
+                onClick={() => {
+                  const newBanner = {
+                    id: Date.now(),
+                    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1600&q=80",
+                    tag: "NEW DROP",
+                    title: "BỘ SƯU TẬP MỚI",
+                    subtitle: "Khám phá các mẫu mới cập bến.",
+                    ctaText: "KHÁM PHÁ SẢN PHẨM",
+                    ctaLink: "#catalog",
+                    showCta: true
+                  };
+                  const updated = [...bannerList, newBanner];
+                  saveToSupabase({ ...siteConfig, banners: updated }, products);
+                  setCurrentSlide(updated.length - 1);
+                }}
+                className="bg-black text-white px-4 py-2 font-black uppercase tracking-wider"
+              >
+                + Thêm Slide Banner Mới
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsBannerModalOpen(false)}
+                className="border border-zinc-300 px-5 py-2 font-bold uppercase"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* MODAL BẢNG SIZE DÉP & QUẦN ÁO */}
       {isSizeGuideOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">

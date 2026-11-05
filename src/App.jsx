@@ -297,7 +297,77 @@ export default function App() {
     if (lookbookList.length <= 1) return;
     setCurrentLookIndex((prev) => (prev + 1) % lookbookList.length);
   };
+// Thêm 1 món lẻ từ Lookbook vào giỏ
+  const addLookItemToCart = (prod) => {
+    if (!prod) return;
+    const color = prod.colors?.[0] || "Tiêu chuẩn";
+    const size = prod.sizes?.[0] || "Freesize";
+    const itemKey = `${prod.id}-${color}-${size}`;
 
+    setCart((prev) => {
+      const existing = prev.find((item) => item.itemKey === itemKey);
+      if (existing) {
+        return prev.map((item) =>
+          item.itemKey === itemKey ? { ...item, qty: item.qty + 1 } : item
+        );
+      }
+      return [
+        ...prev,
+        {
+          id: prod.id,
+          sku: prod.sku || "",
+          name: prod.name,
+          price: prod.price,
+          image: prod.image,
+          color: color,
+          size: size,
+          qty: 1,
+          itemKey: itemKey
+        }
+      ];
+    });
+
+    setAddedLookItemId(prod.id);
+    setTimeout(() => setAddedLookItemId(null), 1200);
+    setIsCartOpen(true);
+  };
+
+  // Thêm toàn bộ các món trong Lookbook vào giỏ
+  const addWholeLookToCart = () => {
+    if (!activeLookProducts || activeLookProducts.length === 0) return;
+
+    setCart((prev) => {
+      let updatedCart = [...prev];
+      activeLookProducts.forEach((prod) => {
+        const color = prod.colors?.[0] || "Tiêu chuẩn";
+        const size = prod.sizes?.[0] || "Freesize";
+        const itemKey = `${prod.id}-${color}-${size}`;
+        const existingIndex = updatedCart.findIndex((item) => item.itemKey === itemKey);
+
+        if (existingIndex > -1) {
+          updatedCart[existingIndex] = {
+            ...updatedCart[existingIndex],
+            qty: updatedCart[existingIndex].qty + 1
+          };
+        } else {
+          updatedCart.push({
+            id: prod.id,
+            sku: prod.sku || "",
+            name: prod.name,
+            price: prod.price,
+            image: prod.image,
+            color: color,
+            size: size,
+            qty: 1,
+            itemKey: itemKey
+          });
+        }
+      });
+      return updatedCart;
+    });
+
+    setIsCartOpen(true);
+  };
   const handlePrevLook = () => {
     if (lookbookList.length <= 1) return;
     setCurrentLookIndex((prev) => (prev - 1 + lookbookList.length) % lookbookList.length);
@@ -1602,12 +1672,8 @@ export default function App() {
                                 </div>
                               </div>
 
-                              <button
-                                onClick={() => {
-                                  handleAddToCart(prod, prod.colors?.[0] || "Tiêu chuẩn", prod.sizes?.[0] || "Freesize");
-                                  setAddedLookItemId(prod.id);
-                                  setTimeout(() => setAddedLookItemId(null), 1500);
-                                }}
+                          <button
+                                onClick={() => addLookItemToCart(prod)}
                                 className={`p-2.5 border transition flex-shrink-0 ${
                                   addedLookItemId === prod.id
                                     ? "bg-emerald-600 border-emerald-600 text-white"
@@ -1630,11 +1696,7 @@ export default function App() {
                     {activeLookProducts.length > 0 && (
                       <div className="pt-4 border-t border-zinc-300">
                         <button
-                          onClick={() => {
-                            activeLookProducts.forEach((p) => {
-                              handleAddToCart(p, p.colors?.[0] || "Tiêu chuẩn", p.sizes?.[0] || "Freesize");
-                            });
-                          }}
+                          onClick={addWholeLookToCart}
                           className="w-full bg-black text-white py-3.5 px-4 font-black text-xs uppercase tracking-[0.2em] hover:bg-zinc-800 transition flex items-center justify-center gap-2"
                         >
                           <ShoppingBag className="w-4 h-4" /> Thêm Trọn Bộ Set Này Vào Giỏ

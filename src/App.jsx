@@ -59,6 +59,25 @@ const DEFAULT_SITE_CONFIG = {
       showCta: true
     }
   ],
+  // Dữ liệu Lookbook phối đồ trang chủ
+  lookbooks: [
+    {
+      id: 1,
+      lookNumber: "LOOK 01",
+      theme: "STUSSY MONOCHROME",
+      tagline: "Bộ phối đường phố tông đen trắng tối giản",
+      modelImage: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1000&q=80",
+      productIds: [1, 2]
+    },
+    {
+      id: 2,
+      lookNumber: "LOOK 02",
+      theme: "URBAN RUNWAY",
+      tagline: "Form dáng phóng khoáng, năng động",
+      modelImage: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1000&q=80",
+      productIds: [3, 4]
+    }
+  ],
   orders: []
 };
 
@@ -256,6 +275,33 @@ export default function App() {
 
   // Quản lý Slider Banner
   const [currentSlide, setCurrentSlide] = useState(0);
+  // Quản lý Lookbook Showcase
+  const [currentLookIndex, setCurrentLookIndex] = useState(0);
+  const [isLookbookModalOpen, setIsLookbookModalOpen] = useState(false);
+  const [addedLookItemId, setAddedLookItemId] = useState(null);
+
+  const lookbookList = siteConfig.lookbooks && siteConfig.lookbooks.length > 0
+    ? siteConfig.lookbooks
+    : [];
+
+  const activeLook = lookbookList[currentLookIndex] || lookbookList[0] || null;
+
+  // Lấy các món đồ có sẵn trong kho hàng dựa trên ID đã gán vào Look
+  const activeLookProducts = activeLook
+    ? (activeLook.productIds || [])
+        .map((pid) => products.find((p) => p.id === pid))
+        .filter(Boolean)
+    : [];
+
+  const handleNextLook = () => {
+    if (lookbookList.length <= 1) return;
+    setCurrentLookIndex((prev) => (prev + 1) % lookbookList.length);
+  };
+
+  const handlePrevLook = () => {
+    if (lookbookList.length <= 1) return;
+    setCurrentLookIndex((prev) => (prev - 1 + lookbookList.length) % lookbookList.length);
+  };
   const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
 
   // Danh sách banner hiện hành
@@ -1425,7 +1471,181 @@ export default function App() {
               </div>
             )}
           </section>
+{/* KHỐI INTERACTIVE LOOKBOOK SHOWCASE */}
+          {lookbookList.length > 0 && activeLook && (
+            <section className="bg-zinc-100 text-black py-16 px-4 sm:px-6 lg:px-8 border-b border-black overflow-hidden select-none relative group">
+              <div className="max-w-7xl mx-auto">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-4 border-b border-zinc-300 gap-4">
+                  <div>
+                    <span className="text-[11px] font-mono tracking-[0.25em] text-zinc-500 uppercase block mb-1">
+                      CHUD AUTHENTIC // RUNWAY LOOKBOOK
+                    </span>
+                    <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight">
+                      Gợi Ý Phối Đồ Chuẩn Mực
+                    </h2>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-xs font-mono text-zinc-600">
+                      {activeLook.lookNumber} / {lookbookList.length < 10 ? `0${lookbookList.length}` : lookbookList.length} — {activeLook.theme}
+                    </div>
+                    {isAdmin && (
+                      <button
+                        onClick={() => setIsLookbookModalOpen(true)}
+                        className="bg-black text-amber-300 border border-amber-400 px-3 py-1.5 text-xs font-bold uppercase tracking-wider hover:bg-zinc-900 flex items-center gap-1.5"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" /> Quản Lý Lookbook ({lookbookList.length})
+                      </button>
+                    )}
+                  </div>
+                </div>
 
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                  {/* Trượt người mẫu dạng chiều sâu 3D */}
+                  <div className="lg:col-span-8 relative h-[500px] sm:h-[600px] flex items-center justify-center overflow-hidden bg-white border border-zinc-300">
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      {lookbookList.map((look, idx) => {
+                        const offset = idx - currentLookIndex;
+                        const isCenter = offset === 0;
+                        const isLeft = offset === -1 || (currentLookIndex === 0 && idx === lookbookList.length - 1);
+                        const isRight = offset === 1 || (currentLookIndex === lookbookList.length - 1 && idx === 0);
+
+                        if (!isCenter && !isLeft && !isRight) return null;
+
+                        let pos = "z-20 scale-100 opacity-100 translate-x-0";
+                        if (isLeft) pos = "z-10 scale-75 opacity-35 -translate-x-[42%] blur-[2px] cursor-pointer hover:opacity-70";
+                        if (isRight) pos = "z-10 scale-75 opacity-35 translate-x-[42%] blur-[2px] cursor-pointer hover:opacity-70";
+
+                        return (
+                          <div
+                            key={look.id || idx}
+                            onClick={() => setCurrentLookIndex(idx)}
+                            className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out ${pos}`}
+                          >
+                            <img
+                              src={look.modelImage}
+                              alt={look.theme}
+                              className="h-[88%] w-auto object-contain pointer-events-none drop-shadow-2xl"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="absolute bottom-6 left-6 z-30">
+                      <span className="font-mono text-3xl sm:text-5xl font-black tracking-tighter block">
+                        {activeLook.lookNumber}
+                      </span>
+                      <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                        {activeLook.theme}
+                      </span>
+                    </div>
+
+                    {lookbookList.length > 1 && (
+                      <div className="absolute bottom-6 right-6 z-30 flex gap-2">
+                        <button
+                          onClick={handlePrevLook}
+                          className="w-10 h-10 border border-black bg-white hover:bg-black hover:text-white transition flex items-center justify-center"
+                        >
+                          <ArrowLeft className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={handleNextLook}
+                          className="w-10 h-10 border border-black bg-white hover:bg-black hover:text-white transition flex items-center justify-center"
+                        >
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cột danh sách món đồ lẻ trong Set */}
+                  <div className="lg:col-span-4 flex flex-col justify-between h-full space-y-6">
+                    <div>
+                      <div className="border-b border-black pb-2 mb-4">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block">
+                          CHI TIẾT TRANG PHỤC
+                        </span>
+                        <h3 className="text-lg font-black uppercase tracking-tight">
+                          Sản Phẩm Trong Set
+                        </h3>
+                        <p className="text-xs text-zinc-600 mt-1">
+                          {activeLook.tagline}
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        {activeLookProducts.length === 0 ? (
+                          <div className="text-xs text-zinc-500 italic p-4 bg-white border border-dashed border-zinc-300">
+                            Chưa liên kết sản phẩm cho set này. Nhấn Quản Lý Lookbook để chọn sản phẩm.
+                          </div>
+                        ) : (
+                          activeLookProducts.map((prod) => (
+                            <div
+                              key={prod.id}
+                              className="p-3 bg-white border border-zinc-300 flex items-center gap-3 hover:border-black transition"
+                            >
+                              <img
+                                src={prod.image}
+                                alt={prod.name}
+                                className="w-16 h-16 object-cover bg-zinc-100 border border-zinc-200 flex-shrink-0"
+                              />
+
+                              <div className="flex-1 min-w-0">
+                                <div className="text-[10px] font-mono text-zinc-500 uppercase">
+                                  {prod.brand} • {prod.category}
+                                </div>
+                                <h4 className="font-bold text-xs truncate text-zinc-900 mt-0.5">
+                                  {prod.name}
+                                </h4>
+                                <div className="font-mono font-black text-xs mt-1">
+                                  {formatVND(prod.price)}
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => {
+                                  handleAddToCart(prod, prod.colors?.[0] || "Tiêu chuẩn", prod.sizes?.[0] || "Freesize");
+                                  setAddedLookItemId(prod.id);
+                                  setTimeout(() => setAddedLookItemId(null), 1500);
+                                }}
+                                className={`p-2.5 border transition flex-shrink-0 ${
+                                  addedLookItemId === prod.id
+                                    ? "bg-emerald-600 border-emerald-600 text-white"
+                                    : "border-black hover:bg-black hover:text-white text-black"
+                                }`}
+                                title="Thêm món này vào giỏ"
+                              >
+                                {addedLookItemId === prod.id ? (
+                                  <Check className="w-4 h-4" />
+                                ) : (
+                                  <ShoppingBag className="w-4 h-4" />
+                                )}
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {activeLookProducts.length > 0 && (
+                      <div className="pt-4 border-t border-zinc-300">
+                        <button
+                          onClick={() => {
+                            activeLookProducts.forEach((p) => {
+                              handleAddToCart(p, p.colors?.[0] || "Tiêu chuẩn", p.sizes?.[0] || "Freesize");
+                            });
+                          }}
+                          className="w-full bg-black text-white py-3.5 px-4 font-black text-xs uppercase tracking-[0.2em] hover:bg-zinc-800 transition flex items-center justify-center gap-2"
+                        >
+                          <ShoppingBag className="w-4 h-4" /> Thêm Trọn Bộ Set Này Vào Giỏ
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
           <section id="catalog" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-8 border-b border-zinc-200">
               <div className="flex flex-wrap items-center gap-2">
@@ -2772,6 +2992,180 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsBannerModalOpen(false)}
+                className="border border-zinc-300 px-5 py-2 font-bold uppercase"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* MODAL QUẢN LÝ LOOKBOOK DÀNH CHO ADMIN */}
+      {isLookbookModalOpen && isAdmin && (
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white text-black max-w-3xl w-full p-6 border-2 border-black space-y-4 my-8 max-h-[90vh] overflow-y-auto text-xs">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <h3 className="font-black uppercase tracking-wider text-sm">
+                Quản Lý Lookbook & Phối Đồ
+              </h3>
+              <button onClick={() => setIsLookbookModalOpen(false)}>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              {lookbookList.map((lb, idx) => (
+                <div key={lb.id || idx} className="border border-zinc-300 p-4 space-y-3 bg-zinc-50 relative">
+                  <div className="flex items-center justify-between font-black uppercase text-[11px] border-b pb-2">
+                    <span>{lb.lookNumber || `LOOK 0${idx + 1}`} — {lb.theme}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = lookbookList.filter((_, i) => i !== idx);
+                        saveToSupabase({ ...siteConfig, lookbooks: updated }, products);
+                      }}
+                      className="text-rose-600 font-bold hover:underline"
+                    >
+                      Xóa Set Này
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="font-bold block mb-1">Mã Look (VD: LOOK 01)</label>
+                      <input
+                        type="text"
+                        value={lb.lookNumber || ""}
+                        onChange={(e) => {
+                          const updated = [...lookbookList];
+                          updated[idx] = { ...updated[idx], lookNumber: e.target.value.toUpperCase() };
+                          saveToSupabase({ ...siteConfig, lookbooks: updated }, products);
+                        }}
+                        className="w-full border border-zinc-300 px-2 py-1.5 uppercase font-mono font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold block mb-1">Chủ đề (VD: MONOCHROME)</label>
+                      <input
+                        type="text"
+                        value={lb.theme || ""}
+                        onChange={(e) => {
+                          const updated = [...lookbookList];
+                          updated[idx] = { ...updated[idx], theme: e.target.value };
+                          saveToSupabase({ ...siteConfig, lookbooks: updated }, products);
+                        }}
+                        className="w-full border border-zinc-300 px-2 py-1.5 uppercase font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold block mb-1">Mô tả ngắn</label>
+                      <input
+                        type="text"
+                        value={lb.tagline || ""}
+                        onChange={(e) => {
+                          const updated = [...lookbookList];
+                          updated[idx] = { ...updated[idx], tagline: e.target.value };
+                          saveToSupabase({ ...siteConfig, lookbooks: updated }, products);
+                        }}
+                        className="w-full border border-zinc-300 px-2 py-1.5"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tải ảnh người mẫu */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="font-bold block mb-1">Link ảnh mẫu mặc set (Nên dùng ảnh tách nền)</label>
+                      <input
+                        type="text"
+                        value={lb.modelImage || ""}
+                        onChange={(e) => {
+                          const updated = [...lookbookList];
+                          updated[idx] = { ...updated[idx], modelImage: e.target.value };
+                          saveToSupabase({ ...siteConfig, lookbooks: updated }, products);
+                        }}
+                        className="w-full border border-zinc-300 px-2 py-1.5 font-mono text-[11px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold block mb-1">Hoặc tải ảnh từ máy</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const updated = [...lookbookList];
+                            updated[idx] = { ...updated[idx], modelImage: reader.result };
+                            saveToSupabase({ ...siteConfig, lookbooks: updated }, products);
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        className="text-[11px]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tích chọn sản phẩm gắn vào set */}
+                  <div className="pt-2 border-t border-zinc-200">
+                    <label className="font-bold block mb-1 text-zinc-700">
+                      Chọn các món đồ trong kho thuộc set này (Tích chọn):
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-36 overflow-y-auto border border-zinc-200 p-2 bg-white">
+                      {products.map((p) => {
+                        const isChecked = (lb.productIds || []).includes(p.id);
+                        return (
+                          <label key={p.id} className="flex items-center gap-1.5 text-[11px] cursor-pointer hover:bg-zinc-50 p-1">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                const currentPids = lb.productIds || [];
+                                const newPids = e.target.checked
+                                  ? [...currentPids, p.id]
+                                  : currentPids.filter((id) => id !== p.id);
+                                const updated = [...lookbookList];
+                                updated[idx] = { ...updated[idx], productIds: newPids };
+                                saveToSupabase({ ...siteConfig, lookbooks: updated }, products);
+                              }}
+                              className="accent-black"
+                            />
+                            <span className="truncate">{p.name}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-between items-center pt-3 border-t">
+              <button
+                type="button"
+                onClick={() => {
+                  const newLook = {
+                    id: Date.now(),
+                    lookNumber: `LOOK 0${lookbookList.length + 1}`,
+                    theme: "NEW OUTFIT",
+                    tagline: "Bộ phối mới cập nhật",
+                    modelImage: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1000&q=80",
+                    productIds: []
+                  };
+                  const updated = [...lookbookList, newLook];
+                  saveToSupabase({ ...siteConfig, lookbooks: updated }, products);
+                  setCurrentLookIndex(updated.length - 1);
+                }}
+                className="bg-black text-white px-4 py-2 font-black uppercase tracking-wider"
+              >
+                + Thêm Set Look Mới
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsLookbookModalOpen(false)}
                 className="border border-zinc-300 px-5 py-2 font-bold uppercase"
               >
                 Đóng
